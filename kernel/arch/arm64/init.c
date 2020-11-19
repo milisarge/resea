@@ -11,11 +11,14 @@ extern uint8_t exception_vector;
 void arch_idle(void) {
     task_switch();
 
-    // Enable IRQ.
-    __asm__ __volatile__("msr daifclr, #2");
-
     while (true) {
+        unlock();
+        // Enable IRQ.
+        __asm__ __volatile__("msr daifclr, #2");
         __asm__ __volatile__("wfi");
+        // Disable IRQ.
+        __asm__ __volatile__("msr daifset, #2");
+        lock();
     }
 }
 
@@ -23,7 +26,12 @@ extern char __bss[];
 extern char __bss_end[];
 
 __noreturn void mpinit(void) {
-    DBG("MP #%d", mp_self());
+    INFO("Hello from CPU #%d, halting for now", mp_self());
+    while (true) {
+        __asm__ __volatile__("msr daifset, #2");
+        __asm__ __volatile__("wfe");
+    }
+
     mpmain();
 
     PANIC("mpmain returned");
@@ -50,9 +58,9 @@ void arm64_init(void) {
 
     bzero(get_cpuvar(), sizeof(struct cpuvar));
     bzero(__bss, (vaddr_t) __bss_end - (vaddr_t) __bss);
-    lock();
 
     arm64_peripherals_init();
+    lock();
 
     // Initialize the performance counter for benchmarking.
     ARM64_MSR(pmcr_el0, 0b1ull);           // Reset counters.

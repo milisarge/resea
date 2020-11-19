@@ -20,21 +20,43 @@ void mp_start(void) {
 }
 
 void mp_reschedule(void) {
-    // Do nothing: we don't support multiprocessors.
+    // TODO:
 }
 
+#define LOCKED        0x12ab
+#define UNLOCKED      0xc0be
+#define NO_LOCK_OWNER -1
+static int big_lock = UNLOCKED;
+static int lock_owner = NO_LOCK_OWNER;
+
 void lock(void) {
-    // TODO:
+    return; // FIXME:
+
+    if (mp_self() == lock_owner) {
+        PANIC("recursive lock (#%d)", mp_self());
+    }
+
+    while (!__sync_bool_compare_and_swap(&big_lock, UNLOCKED, LOCKED)) {
+//        __asm__ __volatile__("");
+    }
+
+    lock_owner = mp_self();
 }
 
 void panic_lock(void) {
-    // TODO:
+    lock_owner = mp_self();
 }
 
 void unlock(void) {
-    // TODO:
+    return; // FIXME:
+
+    DEBUG_ASSERT(lock_owner == mp_self());
+    lock_owner = NO_LOCK_OWNER;
+    __sync_bool_compare_and_swap(&big_lock, LOCKED, UNLOCKED);
 }
 
 void panic_unlock(void) {
-    // TODO:
+    if (mp_self() == lock_owner) {
+        lock_owner = NO_LOCK_OWNER;
+    }
 }
