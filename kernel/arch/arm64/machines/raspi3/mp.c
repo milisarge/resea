@@ -9,7 +9,6 @@ extern char boot[];
 void machine_mp_start(void) {
     for (int cpu = 1; cpu < NUM_CPUS; cpu++) {
         TRACE("Booting CPU #%d...", cpu);
-        TRACE("(uint32_t) boot = %p", (uint32_t) boot);
 
         // https://leiradel.github.io/2019/01/20/Raspberry-Pi-Stubs.html
         paddr_t paddr = 0xd8 + cpu * 8;
