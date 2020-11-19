@@ -96,7 +96,8 @@ bsp_boot:
 
 enable_mmu:
     // Configure paging.
-    ldr  x0, =0x0000007b // Normal memory, cache enabled
+    ldr  x0, =0x000000bb // AttrIndx == 0: Normal memory, cache enabled
+                         // AttrIndx == 1: Device-nGnRnE memory
     msr  mair_el1, x0
 
     ldr  x0, =0x00100010 // 4KiB pages, the region size is 2^48.

@@ -55,6 +55,7 @@ static inline uint32_t mmio_read(vaddr_t paddr) {
 
 static inline void mmio_write(paddr_t paddr, uint32_t value) {
     *((volatile uint32_t *) from_paddr(paddr)) = value;
+    __asm__ __volatile__("dmb sy");
 }
 
 void arm64_peripherals_init(void);
