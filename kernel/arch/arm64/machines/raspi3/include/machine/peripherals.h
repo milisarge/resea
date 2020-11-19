@@ -44,7 +44,6 @@
 
 // https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2836/QA7_rev3.4.pdf
 #define TIMER_IRQCNTL(cpu) (0x40000040 + (cpu) * 4)
-#define MAILBOX3_SET(cpu)  (0x4000008c + (cpu) * 16)
 
 // Watchdog timer values.
 #define PM_PASSWORD        0x5a000000
