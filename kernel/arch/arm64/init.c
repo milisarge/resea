@@ -26,7 +26,6 @@ extern char __bss[];
 extern char __bss_end[];
 
 __noreturn void mpinit(void) {
-    INFO("Hello from CPU #%d, halting for now", mp_self());
     while (true) {
         __asm__ __volatile__("msr daifset, #2");
         __asm__ __volatile__("wfe");

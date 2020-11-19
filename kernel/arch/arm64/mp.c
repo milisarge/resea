@@ -8,7 +8,6 @@ struct cpuvar *arm64_get_cpuvar(void) {
     return &cpuvars[mp_self()];
 }
 
-
 void halt(void) {
     while (true) {
         __asm__ __volatile__("wfi");
