@@ -29,7 +29,7 @@ ap_boot:
     b enable_mmu
 
 bsp_boot:
-    // Construct the kernel paging table (i.e. TTBR1).
+    // Construct the kernel paging table.
     //
     //   offsets         |    Table
     //  -------------------------------
@@ -96,8 +96,7 @@ bsp_boot:
 
 enable_mmu:
     // Configure paging.
-    ldr  x0, =0x00000044 // 0: Device-nGnRnE memory
-                         // 1: Normal memory, FIXME: outer/inner non-cacheble
+    ldr  x0, =0x0000007b // Normal memory, cache enabled
     msr  mair_el1, x0
 
     ldr  x0, =0x00100010 // 4KiB pages, the region size is 2^48.
@@ -111,7 +110,7 @@ enable_mmu:
     ldr  x1, =0xffff000000000000
     orr  x1, x0, x1
 
-    ldr  x0, =0x30d00801 // Lttile Endian, MMU enabled, FIXME: I/D-cache disabled (just for now)
+    ldr  x0, =0x30d01805 // Lttile Endian, MMU enabled, Don't disable I/D-cache
     dsb ish
     isb
     msr  sctlr_el1, x0
