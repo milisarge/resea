@@ -17,16 +17,35 @@ el1_mode:
     mrs  x1, mpidr_el1
     and  x1, x1, #3
 
-    // FIXME:
+    // Set the per-cpu stack pointer.
     ldr  x2, =__boot_stack_base
     ldr  x3, #0x1000
     add  x2, x2, #0x1000
-    madd x3, x3, x1, x2 // x3 = x2 + x3 * x1
+    madd x3, x3, x1, x2 // x3 = x2 + x3 * x1 = base + PAGE_SIZE * cpu_id
     mov  sp, x3
     cbz x1, bsp_boot
 
 ap_boot:
-    b halt
+    adr  x0, ap_mmu_enabled
+    ldr  x1, =0xffff000000000000
+    orr  x1, x0, x1
+
+    ldr  x0, =0x30d00801 // Lttile Endian, MMU enabled, FIXME: I/D-cache disabled (just for now)
+    dsb ish
+    isb
+    msr  sctlr_el1, x0
+    isb
+    br   x1
+
+ap_mmu_enabled:
+    // Update SP to use the upper address.
+    mov  x0, sp
+    ldr  x1, =0xffff000000000000
+    orr  x0, x0, x1
+    mov  sp, x0
+
+    ldr  x0, =arm64_mpinit
+    br   x0
 
 bsp_boot:
     // Construct the kernel paging table (i.e. TTBR1).

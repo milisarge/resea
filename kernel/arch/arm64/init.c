@@ -52,6 +52,15 @@ void arm64_init(void) {
     }
 }
 
+void arm64_mpinit(void) {
+    mpmain();
+
+    PANIC("mpmain returned");
+    for (;;) {
+        halt();
+    }
+}
+
 void arch_semihosting_halt(void) {
     // ARM Semihosting
     uint64_t params[] = {

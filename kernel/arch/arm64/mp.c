@@ -1,5 +1,6 @@
 #include <task.h>
 #include "asm.h"
+#include "machine.h"
 
 struct cpuvar cpuvar;
 
@@ -10,7 +11,7 @@ void halt(void) {
 }
 
 void mp_start(void) {
-    // Do nothing: we don't support multiprocessors.
+    machine_mp_start();
 }
 
 void mp_reschedule(void) {

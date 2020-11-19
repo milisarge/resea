@@ -2,6 +2,7 @@
 #define __ARCH_H__
 
 #include <types.h>
+#include "asm.h"
 
 #define STACK_SIZE 4096
 #define TICK_HZ 1000
@@ -43,7 +44,7 @@ static inline bool is_kernel_paddr(paddr_t paddr) {
 }
 
 static inline int mp_self(void) {
-    return 0;
+    return ARM64_MRS(mpidr_el1) & 0xff;
 }
 
 static inline bool mp_is_bsp(void) {
