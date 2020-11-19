@@ -53,13 +53,13 @@ bsp_boot:
     // Level-1 table
     add  x0, x4, #0x1000
     add  x1, x4, #0x2000     // L2 table address base. Table descriptor.
-    ldr  x5, =0x00000403     // Table descriptor.
+    ldr  x5, =0x00000b03     // Table descriptor.
     orr  x1, x1, x5
     str  x1, [x0]
 
     add  x0, x0, #8
     add  x1, x4, #0x3000     // L2 table address base. Table descriptor.
-    ldr  x5, =0x00000403     // Table descriptor.
+    ldr  x5, =0x00000b03     // Table descriptor.
     orr  x1, x1, x5
     str  x1, [x0]
 
