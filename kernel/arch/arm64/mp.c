@@ -1,8 +1,13 @@
 #include <task.h>
+#include <machine/machine.h>
 #include "asm.h"
-#include "machine.h"
 
-struct cpuvar cpuvar;
+static struct cpuvar cpuvars[NUM_CPUS_MAX];
+
+struct cpuvar *arm64_get_cpuvar(void) {
+    return &cpuvars[mp_self()];
+}
+
 
 void halt(void) {
     while (true) {

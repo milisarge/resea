@@ -2,6 +2,7 @@
 #define __ARCH_H__
 
 #include <types.h>
+#include <machine/machine.h>
 #include "asm.h"
 
 #define STACK_SIZE 4096
@@ -55,9 +56,9 @@ static inline bool mp_is_bsp(void) {
 struct arch_cpuvar {
 };
 
-extern struct cpuvar cpuvar;
+struct cpuvar *arm64_get_cpuvar(void);
 static inline struct cpuvar *get_cpuvar(void) {
-    return &cpuvar;
+    return arm64_get_cpuvar();
 }
 
 #endif

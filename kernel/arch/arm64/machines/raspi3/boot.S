@@ -19,33 +19,14 @@ el1_mode:
 
     // Set the per-cpu stack pointer.
     ldr  x2, =__boot_stack_base
-    ldr  x3, #0x1000
+    ldr  x3, =0x1000
     add  x2, x2, #0x1000
-    madd x3, x3, x1, x2 // x3 = x2 + x3 * x1 = base + PAGE_SIZE * cpu_id
-    mov  sp, x3
+    madd x4, x3, x1, x2 // x3 = x3 * x1 + x2 = PAGE_SIZE * cpu_id + x2
+    mov  sp, x4
     cbz x1, bsp_boot
 
 ap_boot:
-    adr  x0, ap_mmu_enabled
-    ldr  x1, =0xffff000000000000
-    orr  x1, x0, x1
-
-    ldr  x0, =0x30d00801 // Lttile Endian, MMU enabled, FIXME: I/D-cache disabled (just for now)
-    dsb ish
-    isb
-    msr  sctlr_el1, x0
-    isb
-    br   x1
-
-ap_mmu_enabled:
-    // Update SP to use the upper address.
-    mov  x0, sp
-    ldr  x1, =0xffff000000000000
-    orr  x0, x0, x1
-    mov  sp, x0
-
-    ldr  x0, =arm64_mpinit
-    br   x0
+    b enable_mmu
 
 bsp_boot:
     // Construct the kernel paging table (i.e. TTBR1).
@@ -113,6 +94,7 @@ bsp_boot:
     sub  x2, x2, 1
     cbnz x2, 3b
 
+enable_mmu:
     // Configure paging.
     ldr  x0, =0x00000044 // 0: Device-nGnRnE memory
                          // 1: Normal memory, FIXME: outer/inner non-cacheble
@@ -125,7 +107,6 @@ bsp_boot:
     msr  ttbr1_el1, x0
     msr  ttbr0_el1, x0
 
-enable_mmu:
     adr  x0, mmu_enabled
     ldr  x1, =0xffff000000000000
     orr  x1, x0, x1

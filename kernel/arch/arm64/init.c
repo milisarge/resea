@@ -22,12 +22,28 @@ void arch_idle(void) {
 extern char __bss[];
 extern char __bss_end[];
 
+__noreturn void mpinit(void) {
+    DBG("MP #%d", mp_self());
+    mpmain();
+
+    PANIC("mpmain returned");
+    for (;;) {
+        halt();
+    }
+}
+
 void arm64_init(void) {
     // TODO: disable unused exception table vectors
     // TODO: smp
     // TODO: kdebug
     // TODO: improve tlb flushing
     ARM64_MSR(vbar_el1, &exception_vector);
+
+    if (!mp_is_bsp()) {
+        lock();
+        mpinit();
+        UNREACHABLE();
+    }
 
     // We no longer need to access the lower addresses.
     ARM64_MSR(ttbr0_el1, 0ull);
@@ -47,15 +63,6 @@ void arm64_init(void) {
     kmain();
 
     PANIC("kmain returned");
-    for (;;) {
-        halt();
-    }
-}
-
-void arm64_mpinit(void) {
-    mpmain();
-
-    PANIC("mpmain returned");
     for (;;) {
         halt();
     }
