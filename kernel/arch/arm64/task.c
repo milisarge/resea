@@ -44,7 +44,7 @@ void arch_task_destroy(struct task *task) {
 void arm64_task_switch(vaddr_t *prev_sp, vaddr_t next_sp);
 
 void arch_task_switch(struct task *prev, struct task *next) {
-    ARM64_MSR(ttbr0_el1, next->arch.ttbr0);
+    ARM64_MSR(ttbr0_el1, next->arch.ttbr0 | 0x7b);
     __asm__ __volatile__("dsb ish");
     __asm__ __volatile__("isb");
     __asm__ __volatile__("tlbi vmalle1is");
