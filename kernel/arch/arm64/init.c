@@ -67,7 +67,25 @@ void arm64_init(void) {
     // Initialize the performance counter for benchmarking.
     ARM64_MSR(pmcr_el0, 0b1ull);           // Reset counters.
     ARM64_MSR(pmcr_el0, 0b11ull);          // Enable counters.
-    ARM64_MSR(pmcntenset_el0, 1ull << 31); // Enable the counter register.
+
+    int num_perf_counters = (ARM64_MRS(pmcr_el0) >> 11) & 0b11111;
+    ASSERT(num_perf_counters >= 4);
+    DBG("pmccfiltr_el0 = %p", ARM64_MRS(pmccfiltr_el0));
+    // ARM64_MSR(pmccfiltr_el0, 1ull << 31);  // .
+
+    uint32_t pmceid = ARM64_MRS(pmceid0_el0);
+    DBG("pmceid_el0 = %p", pmceid);
+    ASSERT((pmceid & (1 << 4)) != 0 && "L1D_CACHE event is not supported");
+    ASSERT((pmceid & (1 << 22)) != 0 && "L2D_CACHE event is not supported");
+    ASSERT((pmceid & (1 << 19)) != 0 && "MEM_ACCESS event is not supported");
+    ASSERT((pmceid & (1 << 9)) != 0 && "EXC_TAKEN event is not supported");
+    ARM64_MSR(pmevtyper0_el0, 0x04ull);
+    ARM64_MSR(pmevtyper1_el0, 0x16ull);
+    ARM64_MSR(pmevtyper2_el0, 0x13ull);
+    ARM64_MSR(pmevtyper3_el0, 0x0aull);
+
+
+    ARM64_MSR(pmcntenset_el0, 0x8000000full); // Enable the cycle and 4 event counters.
     ARM64_MSR(pmuserenr_el0, 0b11ull);     // Enable user access to the counters.
 
     kmain();

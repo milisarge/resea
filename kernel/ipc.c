@@ -44,6 +44,7 @@ static void resume_sender(struct task *receiver, task_t src) {
 
 /// Sends and receives a message. Note that `m` is a user pointer if
 /// IPC_KERNEL is not set!
+__attribute__((noinline))
 static error_t ipc_slowpath(struct task *dst, task_t src, __user struct message *m,
                             unsigned flags) {
     // Send a message.
@@ -135,6 +136,7 @@ static error_t ipc_slowpath(struct task *dst, task_t src, __user struct message 
 /// The IPC fastpath: an IPC implementation optimized for the common case.
 ///
 /// Note that `m` is a user pointer if IPC_KERNEL is not set!
+__attribute__((noinline))
 error_t ipc(struct task *dst, task_t src, __user struct message *m, unsigned flags) {
     if (dst == CURRENT) {
         WARN_DBG("%s: tried to send a message to myself", CURRENT->name);
