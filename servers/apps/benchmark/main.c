@@ -123,7 +123,6 @@ static void print_stats(const char *name) {
 }
 
 inline static void begin(int i) {
-    INFO("exception_counter = %d", exception_counter());
     iters[i].cycles = cycle_counter();
     iters[i].l1d_cache_access = l1d_cache_counter();
     iters[i].l2d_cache_access = l2d_cache_counter();
@@ -132,7 +131,6 @@ inline static void begin(int i) {
 }
 
 inline static void end(int i) {
-    DBG("exception_counter = %d", exception_counter());
     iters[i].cycles = cycle_counter() - iters[i].cycles;
     iters[i].l1d_cache_access = l1d_cache_counter() - iters[i].l1d_cache_access;
     iters[i].l2d_cache_access = l2d_cache_counter() - iters[i].l2d_cache_access;

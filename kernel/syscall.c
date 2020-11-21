@@ -298,8 +298,8 @@ static error_t sys_kdebug(__user const char *cmd, size_t cmd_len,
 long handle_syscall(int n, long a1, long a2, long a3, long a4, long a5) {
     stack_check();
 #ifdef CONFIG_TRACE_EXCEPTION
-            TRACE("syscall: %s: n=%d, a1=%p, a2=%p, a3=%p",
-                  CURRENT->name, n, a1, a2, a3);
+            // TRACE("syscall: %s: n=%d, a1=%p, a2=%p, a3=%p",
+            //       CURRENT->name, n, a1, a2, a3);
 #endif
 
     long ret;
