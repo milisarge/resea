@@ -56,7 +56,7 @@ struct iter {
     uint64_t num_exceptions;
 };
 
-#define NUM_ITERS 128
+#define NUM_ITERS 12
 static struct iter iters[NUM_ITERS];
 
 static void print_stats(const char *name) {
@@ -123,6 +123,7 @@ static void print_stats(const char *name) {
 }
 
 inline static void begin(int i) {
+    INFO("exception_counter = %d", exception_counter());
     iters[i].cycles = cycle_counter();
     iters[i].l1d_cache_access = l1d_cache_counter();
     iters[i].l2d_cache_access = l2d_cache_counter();
@@ -131,6 +132,7 @@ inline static void begin(int i) {
 }
 
 inline static void end(int i) {
+    DBG("exception_counter = %d", exception_counter());
     iters[i].cycles = cycle_counter() - iters[i].cycles;
     iters[i].l1d_cache_access = l1d_cache_counter() - iters[i].l1d_cache_access;
     iters[i].l2d_cache_access = l2d_cache_counter() - iters[i].l2d_cache_access;
@@ -140,95 +142,99 @@ inline static void end(int i) {
 
 void main(void) {
     INFO("starting IPC benchmark...");
+    task_t server_task = ipc_lookup("benchmark_server");
 
-    for (int i = 0; i < NUM_ITERS; i++) {
-        begin(i);
-        end(i);
-    }
-    print_stats("reading cycle counter");
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     begin(i);
+    //     end(i);
+    // }
+    // print_stats("reading cycle counter");
 
-    uint8_t tmp1[512], tmp2[512];
-    for (int i = 0; i < NUM_ITERS; i++) {
-        begin(i);
-        memcpy(tmp1, tmp2, 8);
-        end(i);
-    }
-    print_stats("memcpy (8-bytes)");
+    uint8_t *tmp1 = malloc(512);
+    uint8_t *tmp2 = malloc(512);
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     begin(i);
+    //     memcpy(tmp1, tmp2, 8);
+    //     end(i);
+    // }
+    // print_stats("memcpy (8-bytes)");
 
-    for (int i = 0; i < NUM_ITERS; i++) {
-        begin(i);
-        memcpy(tmp1, tmp2, 64);
-        end(i);
-    }
-    print_stats("memcpy (64-bytes)");
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     begin(i);
+    //     memcpy(tmp1, tmp2, 64);
+    //     end(i);
+    // }
+    // print_stats("memcpy (64-bytes)");
 
-    for (int i = 0; i < NUM_ITERS; i++) {
-        begin(i);
-        memcpy(tmp1, tmp2, 512);
-        end(i);
-    }
-    print_stats("memcpy (512-bytes)");
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     begin(i);
+    //     memcpy(tmp1, tmp2, 512);
+    //     end(i);
+    // }
+    // print_stats("memcpy (512-bytes)");
 
-    for (int i = 0; i < NUM_ITERS; i++) {
-        begin(i);
-        syscall(SYS_NOP, 0, 0, 0, 0, 0);
-        end(i);
-    }
-    print_stats("nop syscall");
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     begin(i);
+    //     syscall(SYS_NOP, 0, 0, 0, 0, 0);
+    //     end(i);
+    // }
+    // print_stats("nop syscall");
 
     //
     //  IPC round-trip benchmark
     //
+    for (int j = 0; j < 2; j++) {
     for (int i = 0; i < NUM_ITERS; i++) {
         struct message m = { .type = BENCHMARK_NOP_MSG };
         begin(i);
-        ipc_call(INIT_TASK, &m);
+        ipc_call(server_task, &m);
         end(i);
+    }
     }
     print_stats("IPC round-trip (simple)");
 
-    //
-    //  IPC round-trip benchmark (with small ool payload)
-    //
-    for (int i = 0; i < NUM_ITERS; i++) {
-        // Since we don't access the data (ool_payload) to be sent, the kernel
-        // internally handles the page fault on the first message passing. Thus
-        // it should take signficantly long on the first time.
-        static char ool_payload[1] = "A";
+    // //
+    // //  IPC round-trip benchmark (with small ool payload)
+    // //
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     // Since we don't access the data (ool_payload) to be sent, the kernel
+    //     // internally handles the page fault on the first message passing. Thus
+    //     // it should take signficantly long on the first time.
+    //     static char ool_payload[1] = "A";
 
-        struct message m;
-        m.type = BENCHMARK_NOP_WITH_OOL_MSG;
-        m.benchmark_nop_with_ool.data = ool_payload;
-        m.benchmark_nop_with_ool.data_len = PAGE_SIZE;
+    //     struct message m;
+    //     m.type = BENCHMARK_NOP_WITH_OOL_MSG;
+    //     m.benchmark_nop_with_ool.data = ool_payload;
+    //     m.benchmark_nop_with_ool.data_len = PAGE_SIZE;
 
-        begin(i);
-        ipc_call(INIT_TASK, &m);
-        end(i);
-        ASSERT(m.type == BENCHMARK_NOP_WITH_OOL_REPLY_MSG);
-        free(m.benchmark_nop_with_ool_reply.data);
-    }
-    print_stats("IPC round-trip (with 1-byte ool)");
+    //     begin(i);
+    //     ipc_call(server_task, &m);
+    //     end(i);
+    //     ASSERT(m.type == BENCHMARK_NOP_WITH_OOL_REPLY_MSG);
+    //     free(m.benchmark_nop_with_ool_reply.data);
+    // }
+    // print_stats("IPC round-trip (with 1-byte ool)");
 
-    //
-    //  IPC round-trip benchmark (with ool payload)
-    //
-    for (int i = 0; i < NUM_ITERS; i++) {
-        // Since we don't access the data (ool_payload) to be sent, the kernel
-        // internally handles the page fault on the first message passing. Thus
-        // it should take signficantly long on the first time.
-        static char ool_payload[PAGE_SIZE] = "This is a ool payload!";
+    // //
+    // //  IPC round-trip benchmark (with ool payload)
+    // //
+    // for (int i = 0; i < NUM_ITERS; i++) {
+    //     // Since we don't access the data (ool_payload) to be sent, the kernel
+    //     // internally handles the page fault on the first message passing. Thus
+    //     // it should take signficantly long on the first time.
+    //     static char ool_payload[PAGE_SIZE] = "This is a ool payload!";
 
-        struct message m;
-        m.type = BENCHMARK_NOP_WITH_OOL_MSG;
-        m.benchmark_nop_with_ool.data = ool_payload;
-        m.benchmark_nop_with_ool.data_len = PAGE_SIZE;
+    //     struct message m;
+    //     m.type = BENCHMARK_NOP_WITH_OOL_MSG;
+    //     m.benchmark_nop_with_ool.data = ool_payload;
+    //     m.benchmark_nop_with_ool.data_len = PAGE_SIZE;
 
-        begin(i);
-        ipc_call(INIT_TASK, &m);
-        end(i);
-        ASSERT(m.type == BENCHMARK_NOP_WITH_OOL_REPLY_MSG);
-        free(m.benchmark_nop_with_ool_reply.data);
-    }
-    print_stats("IPC round-trip (with PAGE_SIZE-sized ool)");
+    //     begin(i);
+    //     ipc_call(server_task, &m);
+    //     end(i);
+    //     ASSERT(m.type == BENCHMARK_NOP_WITH_OOL_REPLY_MSG);
+    //     free(m.benchmark_nop_with_ool_reply.data);
+    // }
+    // print_stats("IPC round-trip (with PAGE_SIZE-sized ool)");
 
 }
