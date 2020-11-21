@@ -44,6 +44,12 @@ static inline uint64_t exception_counter(void) {
     __asm__ __volatile__("mrs %0, pmevcntr3_el0" : "=r" (value));
     return value;
 }
+
+static inline uint64_t l1_tlb_refill_counter(void) {
+    uint64_t value;
+    __asm__ __volatile__("mrs %0, pmevcntr4_el0" : "=r" (value));
+    return value;
+}
 #else
 #    error "unsupported arch"
 #endif
@@ -52,11 +58,12 @@ struct iter {
     uint64_t cycles;
     uint64_t l1d_cache_access;
     uint64_t l2d_cache_access;
+    uint64_t l1_tlb_refill;
     uint64_t mem_access;
     uint64_t num_exceptions;
 };
 
-#define NUM_ITERS 12
+#define NUM_ITERS 1024
 static struct iter iters[NUM_ITERS];
 
 static void print_stats(const char *name) {
@@ -112,6 +119,18 @@ static void print_stats(const char *name) {
     {
         uint64_t avg = 0, min = UINT64_MAX, max = 0;
         for (size_t i = 0; i < NUM_ITERS; i++) {
+            min = MIN(min, iters[i].l1_tlb_refill);
+            max = MAX(max, iters[i].l1_tlb_refill);
+            avg += iters[i].l1_tlb_refill;
+        }
+
+        avg /= NUM_ITERS;
+        INFO("%s: l1_tlb_refill: avg=%d, min=%d, max=%d", name, avg, min, max);
+    }
+
+    {
+        uint64_t avg = 0, min = UINT64_MAX, max = 0;
+        for (size_t i = 0; i < NUM_ITERS; i++) {
             min = MIN(min, iters[i].num_exceptions);
             max = MAX(max, iters[i].num_exceptions);
             avg += iters[i].num_exceptions;
@@ -126,6 +145,7 @@ inline static void begin(int i) {
     iters[i].cycles = cycle_counter();
     iters[i].l1d_cache_access = l1d_cache_counter();
     iters[i].l2d_cache_access = l2d_cache_counter();
+    iters[i].l1_tlb_refill = l1_tlb_refill_counter();
     iters[i].mem_access = mem_access_counter();
     iters[i].num_exceptions = exception_counter();
 }
@@ -134,6 +154,7 @@ inline static void end(int i) {
     iters[i].cycles = cycle_counter() - iters[i].cycles;
     iters[i].l1d_cache_access = l1d_cache_counter() - iters[i].l1d_cache_access;
     iters[i].l2d_cache_access = l2d_cache_counter() - iters[i].l2d_cache_access;
+    iters[i].l1_tlb_refill = l1_tlb_refill_counter() - iters[i].l1_tlb_refill;
     iters[i].mem_access = mem_access_counter() - iters[i].mem_access;
     iters[i].num_exceptions = exception_counter() - iters[i].num_exceptions;
 }
@@ -148,8 +169,8 @@ void main(void) {
     // }
     // print_stats("reading cycle counter");
 
-    uint8_t *tmp1 = malloc(512);
-    uint8_t *tmp2 = malloc(512);
+    // uint8_t *tmp1 = malloc(512);
+    // uint8_t *tmp2 = malloc(512);
     // for (int i = 0; i < NUM_ITERS; i++) {
     //     begin(i);
     //     memcpy(tmp1, tmp2, 8);

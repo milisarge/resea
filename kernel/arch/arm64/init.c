@@ -79,13 +79,15 @@ void arm64_init(void) {
     ASSERT((pmceid & (1 << 22)) != 0 && "L2D_CACHE event is not supported");
     ASSERT((pmceid & (1 << 19)) != 0 && "MEM_ACCESS event is not supported");
     ASSERT((pmceid & (1 << 9)) != 0 && "EXC_TAKEN event is not supported");
+    ASSERT((pmceid & (1 << 5)) != 0 && "L1D_TLB_REFILL event is not supported");
     ARM64_MSR(pmevtyper0_el0, 0x04ull);
     ARM64_MSR(pmevtyper1_el0, 0x16ull);
     ARM64_MSR(pmevtyper2_el0, 0x13ull);
     ARM64_MSR(pmevtyper3_el0, 0x0aull);
+    ARM64_MSR(pmevtyper4_el0, 0x05ull);
 
 
-    ARM64_MSR(pmcntenset_el0, 0x8000000full); // Enable the cycle and 4 event counters.
+    ARM64_MSR(pmcntenset_el0, 0x8000001full); // Enable the cycle and 5 event counters.
     ARM64_MSR(pmuserenr_el0, 0b11ull);     // Enable user access to the counters.
 
     kmain();
