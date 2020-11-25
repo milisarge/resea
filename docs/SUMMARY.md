@@ -15,6 +15,7 @@
   - [Device Manager (dm)](servers/dm.md)
   - [TCP/IP Protocol Stack](servers/tcpip.md)
   - [Linux ABI Emulation (MinLin)](servers/minlin.md)
+  - [GUI (Flutter)](servers/flutter.md)
 
 - [Apps](apps/README.md)
   - [Shell](apps/shell.md)

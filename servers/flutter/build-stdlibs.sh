@@ -1,0 +1,64 @@
+#!/bin/bash
+set -xue
+LLVM_DIR=~/llvm-project
+MUSL_DIR=~/musl-1.2.1
+COMMON_CFLAGS="-D_GNU_SOURCE -D_LIBCPP_HAS_NO_LIBRARY_ALIGNED_ALLOCATION -fcolor-diagnostics -nostdinc -I${MUSL_DIR}/include -I${MUSL_DIR}/arch/x86_64 -I${MUSL_DIR}/arch/generic -I${MUSL_DIR}/obj/include"
+
+cd $MUSL_DIR
+# CC=clang ./configure --disable-shared
+# make -j24
+
+# Build libcxxabi
+cd $LLVM_DIR
+mkdir -p build_libcxxabi
+pushd build_libcxxabi
+cmake -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLIBCXXABI_TARGET_TRIPLE=x86_64-unknown-none-elf \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_LINKER=ld.lld \
+    -DCMAKE_CXX_FLAGS="$COMMON_CFLAGS" \
+    -DCMAKE_C_FLAGS="$COMMON_CFLAGS" \
+    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+    -DLIBCXXABI_ENABLE_STATIC=ON \
+    -DLIBCXXABI_BAREMETAL=ON \
+    -DLIBCXXABI_ENABLE_EXCEPTIONS=OFF \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+    -DLIBCXXABI_ENABLE_THREADS=OFF \
+    -DLIBCXXABI_ENABLE_PIC=OFF \
+    -DLIBCXXABI_ENABLE_SHARED=OFF \
+    -DLIBCXXABI_ENABLE_ASSERTIONS=OFF \
+    -DLIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS=OFF \
+    ../libcxxabi
+ninja
+popd
+
+# Build libcxx
+cd $LLVM_DIR
+mkdir -p build_libcxx
+pushd build_libcxx
+cmake -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLIBCXX_TARGET_TRIPLE=x86_64-unknown-none-elf \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_LINKER=ld.lld \
+    -DCMAKE_CXX_FLAGS="-I../libcxx/include $COMMON_CFLAGS" \
+    -DCMAKE_C_FLAGS="$COMMON_CFLAGS" \
+    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+    -DLIBCXX_ENABLE_STATIC=ON \
+    -LLVM_PATH=$LLVM_DIR \
+    -DLIBCXX_HAS_MUSL_LIBC=ON \
+    -DLIBCXX_CXX_ABI=libcxxabi \
+    -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$LLVM_DIR/libcxxabi/include" \
+    -DLIBCXX_ENABLE_EXCEPTIONS=OFF \
+    -DLIBCXX_ENABLE_FILESYSTEM=OFF \
+    -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF \
+    -DLIBCXX_ENABLE_RTTI=OFF \
+    -DLIBCXX_ENABLE_THREADS=OFF \
+    -DLIBCXX_ENABLE_SHARED=OFF \
+    -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
+    ../libcxx
+ninja -v
+popd
