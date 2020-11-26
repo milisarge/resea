@@ -29,7 +29,10 @@ def main():
     symbols = {}
     for line in open(args.symbols_file).read().strip().split("\n"):
         cols = line.split(" ", 1)
-        addr = int(cols[0], 16)
+        try:
+            addr = int(cols[0], 16)
+        except ValueError:
+            continue
         name = cols[1]
         symbols[addr] = name
 

@@ -2,11 +2,13 @@
 set -xue
 LLVM_DIR=~/llvm-project
 MUSL_DIR=~/musl-1.2.1
-COMMON_CFLAGS="-D_GNU_SOURCE -D_LIBCPP_HAS_NO_LIBRARY_ALIGNED_ALLOCATION -fcolor-diagnostics -nostdinc -I${MUSL_DIR}/include -I${MUSL_DIR}/arch/x86_64 -I${MUSL_DIR}/arch/generic -I${MUSL_DIR}/obj/include"
+SYSROOT_DIR=~/src/flutter/mysdk/sysroot
+COMMON_CFLAGS="-D_GNU_SOURCE -D_LIBCPP_HAS_NO_LIBRARY_ALIGNED_ALLOCATION -fcolor-diagnostics -nostdinc -I${SYSROOT_DIR}/include"
 
 cd $MUSL_DIR
-# CC=clang ./configure --disable-shared
-# make -j24
+CC=clang ./configure --disable-shared --prefix=$SYSROOT_DIR
+make -j24
+make install
 
 # Build libcxxabi
 cd $LLVM_DIR
@@ -15,6 +17,7 @@ pushd build_libcxxabi
 cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DLIBCXXABI_TARGET_TRIPLE=x86_64-unknown-none-elf \
+    -DCMAKE_INSTALL_PREFIX=$SYSROOT_DIR \
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_LINKER=ld.lld \
@@ -32,6 +35,7 @@ cmake -G Ninja \
     -DLIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS=OFF \
     ../libcxxabi
 ninja
+ninja install
 popd
 
 # Build libcxx
@@ -41,6 +45,7 @@ pushd build_libcxx
 cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DLIBCXX_TARGET_TRIPLE=x86_64-unknown-none-elf \
+    -DCMAKE_INSTALL_PREFIX=$SYSROOT_DIR \
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_LINKER=ld.lld \
@@ -60,5 +65,6 @@ cmake -G Ninja \
     -DLIBCXX_ENABLE_SHARED=OFF \
     -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF \
     ../libcxx
-ninja -v
+ninja
+ninja install
 popd

@@ -1,12 +1,14 @@
 #include <resea/ipc.h>
 #include <resea/printf.h>
 #include <string.h>
-#include <flutter_embedder.h>
+
+void init(void);
 
 void main(void) {
     TRACE("starting...");
 
     INFO("ready");
+    init();
     while (true) {
         struct message m;
         bzero(&m, sizeof(m));
