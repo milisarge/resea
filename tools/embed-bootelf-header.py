@@ -17,7 +17,7 @@ def main():
         return
 
     elf = ELFFile(open(args.elf_file, "r+b"))
-    assert elf.num_segments() < 6
+    assert elf.num_segments() < 8
 
     # struct bootelf_header {
     # #define BOOTELF_MAGIC "\xaa\xbbBOOT\xe1\xff"
@@ -32,6 +32,8 @@ def main():
                          elf.header.e_entry, elf.num_segments())
 
     for segment in elf.iter_segments():
+        if segment.header.p_type == 'PT_TLS':
+            continue
         assert segment.header.p_vaddr > 0
         assert segment.header.p_type == 'PT_LOAD'
         assert segment.header.p_offset % PAGE_SIZE == 0

@@ -40,7 +40,7 @@ SECTIONS {
         __bss_end = .;
     } :bss
 
-    . = 0x03000000;
+    . = 0x05000000;
     __zeroed_pages_end = .;
     __straight_mapping = .;
 
