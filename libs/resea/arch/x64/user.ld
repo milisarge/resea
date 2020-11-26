@@ -5,6 +5,9 @@ PHDRS {
     text PT_LOAD;
     data PT_LOAD;
     bss PT_LOAD;
+    tdata PT_TLS;
+    tdata1 PT_TLS;
+    tbss PT_TLS;
 }
 
 SECTIONS {
@@ -49,6 +52,18 @@ SECTIONS {
         *(.bss.*);
         __bss_end = .;
     } :bss
+
+    .tdata : ALIGN(0x1000) {
+        *(.tdata*);
+    } :tdata
+
+    .tdata1 : ALIGN(0x1000) {
+        *(.tdata1*);
+    } :tdata1
+
+    .tbss : ALIGN(0x1000) {
+        *(.tbss*);
+    } :tbss
 
     . = 0x05000000;
     __zeroed_pages_end = .;

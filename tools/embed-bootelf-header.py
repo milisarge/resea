@@ -13,6 +13,9 @@ def main():
     parser.add_argument("elf_file")
     args = parser.parse_args()
 
+    if args.name == "flutter":
+        return
+
     elf = ELFFile(open(args.elf_file, "r+b"))
     assert elf.num_segments() < 6
 
