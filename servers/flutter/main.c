@@ -3,20 +3,12 @@
 #include <string.h>
 
 void init(void);
-
+void init_shims(void);
 void main(void) {
     TRACE("starting...");
 
     INFO("ready");
+    init_shims();
     init();
-    while (true) {
-        struct message m;
-        bzero(&m, sizeof(m));
-        ASSERT_OK(ipc_recv(IPC_ANY, &m));
-
-        switch (m.type) {
-            default:
-                TRACE("unknown message %d", m.type);
-        }
-    }
+    PANIC("returned from flutter!");
 }

@@ -146,13 +146,14 @@ paddr_t pager(struct task *task, vaddr_t vaddr, vaddr_t ip, unsigned fault) {
         return 0;
     }
 
+    vaddr_t vaddr_original = vaddr;
     vaddr = ALIGN_DOWN(vaddr, PAGE_SIZE);
 
     if (fault & EXP_PF_PRESENT) {
         // Invalid access. For instance the user thread has tried to write to
         // readonly area.
         WARN("%s: invalid memory access at %p (IP=%p, perhaps segfault?)",
-            task->name, vaddr, ip);
+            task->name, vaddr_original, ip);
         return 0;
     }
 
@@ -210,7 +211,7 @@ paddr_t pager(struct task *task, vaddr_t vaddr, vaddr_t ip, unsigned fault) {
         }
     }
 
-    WARN("invalid memory access (addr=%p), killing %s...", vaddr, task->name);
+    WARN("invalid memory access (addr=%p), killing %s...", vaddr_original, task->name);
     return 0;
 }
 

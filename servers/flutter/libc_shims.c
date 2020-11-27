@@ -1,713 +1,912 @@
 #include <resea/printf.h>
+#include <string.h>
 
-void accept() {
-    NYI();
-}
+// Flutter expects libc is glibc, we need a workaround on stdin/stdout/stderr...
+struct __FILE;
+struct _reent {
+  int _errno;
+  struct __FILE *_stdin, *_stdout, *_stderr;
 
-void access() {
-    NYI();
-}
+  // Assuming the following fields in newlib do not affect alignments above...
+};
+
+extern struct _reent *_impure_ptr;
+#define _REENT (_impure_ptr)
+struct __FILE *stdin = NULL;
+struct __FILE *stdout = NULL;
+struct __FILE *stderr = NULL;
 
-void bind() {
-    NYI();
+void init_shims(void) {
+    stdin = _REENT->_stdin;
+    stdout = _REENT->_stdout;
+    stderr = _REENT->_stderr;
 }
 
-void catclose() {
-    NYI();
+int accept() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void catgets() {
-    NYI();
+int access() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void catopen() {
-    NYI();
+int bind() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void chdir() {
-    NYI();
+int catclose() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void clock_gettime() {
-    NYI();
+int catgets() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void close() {
-    NYI();
+int catopen() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void closedir() {
-    NYI();
+int chdir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void connect() {
-    NYI();
+int clock_gettime() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __ctype_b_loc() {
-    NYI();
+int close() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __ctype_get_mb_cur_max() {
-    NYI();
+int closedir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __ctype_tolower_loc() {
-    NYI();
+int connect() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dladdr() {
-    NYI();
+int __ctype_b_loc() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dlclose() {
-    NYI();
+int __ctype_get_mb_cur_max() {
+    TRACE("shim: %s", __func__);
+    return 1;
 }
 
-void dlerror() {
-    NYI();
+int __ctype_tolower_loc() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dlopen() {
-    NYI();
+int dladdr() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dlsym() {
-    NYI();
+int dlclose() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dup() {
-    NYI();
+int dlerror() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void dup2() {
-    NYI();
+int dlopen() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void epoll_create() {
-    NYI();
+int dlsym() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void epoll_ctl() {
-    NYI();
+int dup() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void epoll_wait() {
-    NYI();
+int dup2() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __errno_location() {
-    NYI();
+int epoll_create() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void execvp() {
-    NYI();
+int epoll_ctl() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void _exit() {
-    NYI();
+int epoll_wait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void faccessat() {
-    NYI();
+int __errno_location() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fcntl() {
-    NYI();
+int execvp() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fdopendir() {
-    NYI();
+int _exit() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fopen64() {
-    NYI();
+int faccessat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fork() {
-    NYI();
+int fcntl() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void freeaddrinfo() {
-    NYI();
+int fdopendir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void freeifaddrs() {
-    NYI();
+int fopen64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fseeko64() {
-    NYI();
+int fork() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fstat() {
-    NYI();
+int freeaddrinfo() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void fsync() {
-    NYI();
+int freeifaddrs() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void ftello64() {
-    NYI();
+int fseeko64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void ftruncate64() {
-    NYI();
+int fstat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __fxstat64() {
-    NYI();
+int fsync() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __fxstatat64() {
-    NYI();
+int ftello64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void gai_strerror() {
-    NYI();
+int ftruncate64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getaddrinfo() {
-    NYI();
+int __fxstat64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getauxval() {
-    NYI();
+int __fxstatat64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getcwd() {
-    NYI();
+int gai_strerror() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void gethostname() {
-    NYI();
+int getaddrinfo() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getifaddrs() {
-    NYI();
+int getauxval() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getnameinfo() {
-    NYI();
+int getcwd() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getpagesize() {
-    NYI();
+int gethostname() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getpeername() {
-    NYI();
+int getifaddrs() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getpid() {
-    NYI();
+int getnameinfo() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getrusage() {
-    NYI();
+int getpagesize() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getsockname() {
-    NYI();
+int getpeername() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void getsockopt() {
-    NYI();
+int getpid() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void gettimeofday() {
-    NYI();
+int getrusage() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void if_nametoindex() {
-    NYI();
+int getsockname() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void inet_ntop() {
-    NYI();
+int getsockopt() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void inet_pton() {
-    NYI();
+int gettimeofday() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void inotify_add_watch() {
-    NYI();
+int if_nametoindex() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void inotify_init1() {
-    NYI();
+int inet_ntop() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void inotify_rm_watch() {
-    NYI();
+int inet_pton() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void ioctl() {
-    NYI();
+int inotify_add_watch() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void isatty() {
-    NYI();
+int inotify_init1() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __isinf() {
-    NYI();
+int inotify_rm_watch() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __isnan() {
-    NYI();
+int ioctl() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __isoc99_fscanf() {
-    NYI();
+int isatty() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __isoc99_sscanf() {
-    NYI();
+int __isinf() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __isoc99_vsscanf() {
-    NYI();
+int __isnan() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void kill() {
-    NYI();
+int __isoc99_fscanf() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void listen() {
-    NYI();
+int __isoc99_sscanf() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void lseek() {
-    NYI();
+int __isoc99_vsscanf() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void lseek64() {
-    NYI();
+int kill() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __lxstat64() {
-    NYI();
+int listen() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void mkdir() {
-    NYI();
+int lseek() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void mkdirat() {
-    NYI();
+int lseek64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void mmap64() {
-    NYI();
+int __lxstat64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void mprotect() {
-    NYI();
+int mkdir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void munmap() {
-    NYI();
+int mkdirat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void nanosleep() {
-    NYI();
+int mmap64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void open() {
-    NYI();
+int mprotect() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void open64() {
-    NYI();
+int munmap() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void openat64() {
-    NYI();
+int nanosleep() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void opendir() {
-    NYI();
+int open() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pipe() {
-    NYI();
+int open64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pipe2() {
-    NYI();
+int openat64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void poll() {
-    NYI();
+int opendir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void posix_memalign() {
-    NYI();
+int pipe() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pread64() {
-    NYI();
+int pipe2() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_attr_destroy() {
-    NYI();
+int poll() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_attr_getstack() {
-    NYI();
+int posix_memalign() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_attr_init() {
-    NYI();
+int pread64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_attr_setdetachstate() {
-    NYI();
+int pthread_attr_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_attr_setstacksize() {
-    NYI();
+int pthread_attr_getstack() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_condattr_destroy() {
-    NYI();
+int pthread_attr_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_condattr_init() {
-    NYI();
+int pthread_attr_setdetachstate() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_condattr_setclock() {
-    NYI();
+int pthread_attr_setstacksize() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_cond_broadcast() {
-    NYI();
+int pthread_condattr_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_cond_destroy() {
-    NYI();
+int pthread_condattr_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_cond_init() {
-    NYI();
+int pthread_condattr_setclock() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_cond_signal() {
-    NYI();
+int pthread_cond_broadcast() {
+    TRACE("%s", __func__);
+    return 0;
 }
 
-void pthread_cond_timedwait() {
-    NYI();
+int pthread_cond_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_cond_wait() {
-    NYI();
+int pthread_cond_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_create() {
-    NYI();
+int pthread_cond_signal() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_detach() {
-    NYI();
+int pthread_cond_timedwait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_getattr_np() {
-    NYI();
+int pthread_cond_wait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_getspecific() {
-    NYI();
+int pthread_create() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_join() {
-    NYI();
+int pthread_detach() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_key_create() {
-    NYI();
+int pthread_getattr_np() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_key_delete() {
-    NYI();
+int pthread_getspecific() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutexattr_destroy() {
-    NYI();
+int pthread_join() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutexattr_init() {
-    NYI();
+int pthread_key_create() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutexattr_settype() {
-    NYI();
+int pthread_key_delete() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutex_destroy() {
-    NYI();
+int pthread_mutexattr_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutex_init() {
-    NYI();
+int pthread_mutexattr_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutex_lock() {
-    NYI();
+int pthread_mutexattr_settype() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutex_trylock() {
-    NYI();
+int pthread_mutex_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_mutex_unlock() {
-    NYI();
+int pthread_mutex_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_once() {
-    NYI();
+int pthread_mutex_lock() {
+    TRACE("pthread_mutex_lock");
+    return 0;
 }
 
-void pthread_rwlock_destroy() {
-    NYI();
+int pthread_mutex_trylock() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_rwlock_init() {
-    NYI();
+int pthread_mutex_unlock() {
+    TRACE("pthread_mutex_unlock");
+    return 0;
 }
 
-void pthread_rwlock_rdlock() {
-    NYI();
+int pthread_once() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_rwlock_unlock() {
-    NYI();
+int pthread_rwlock_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_rwlock_wrlock() {
-    NYI();
+int pthread_rwlock_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_self() {
-    NYI();
+int pthread_rwlock_rdlock() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_setname_np() {
-    NYI();
+int pthread_rwlock_unlock() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_setspecific() {
-    NYI();
+int pthread_rwlock_wrlock() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void pthread_sigmask() {
-    NYI();
+int pthread_self() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void read() {
-    NYI();
+int pthread_setname_np() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void readdir64() {
-    NYI();
+int pthread_setspecific() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void readlink() {
-    NYI();
+int pthread_sigmask() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void readlinkat() {
-    NYI();
+int read() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void realpath() {
-    NYI();
+int readdir64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void recvfrom() {
-    NYI();
+int readlink() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void renameat() {
-    NYI();
+int readlinkat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void rewinddir() {
-    NYI();
+int realpath() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sbrk() {
-    NYI();
+int recvfrom() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sched_yield() {
-    NYI();
+int renameat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sem_destroy() {
-    NYI();
+int rewinddir() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sem_init() {
-    NYI();
+int sbrk() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sem_post() {
-    NYI();
+int sched_yield() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sem_trywait() {
-    NYI();
+int sem_destroy() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sem_wait() {
-    NYI();
+int sem_init() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sendfile64() {
-    NYI();
+int sem_post() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sendto() {
-    NYI();
+int sem_trywait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void _setjmp() {
-    NYI();
+int sem_wait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void setpriority() {
-    NYI();
+int sendfile64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void setrlimit64() {
-    NYI();
+int sendto() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void setsid() {
-    NYI();
+int _setjmp() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void setsockopt() {
-    NYI();
+int setpriority() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void shutdown() {
-    NYI();
+int setrlimit64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sigaction() {
-    NYI();
+int setsid() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sigaddset() {
-    NYI();
+int setsockopt() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sigemptyset() {
-    NYI();
+int shutdown() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void sigprocmask() {
-    NYI();
+int sigaction() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void socket() {
-    NYI();
+int sigaddset() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void stat() {
-    NYI();
+int sigemptyset() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void stderr() {
-    NYI();
+int sigprocmask() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void stdin() {
-    NYI();
+int socket() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void stdout() {
-    NYI();
+int stat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void symlinkat() {
-    NYI();
+int symlinkat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void syscall() {
-    NYI();
+long syscall(long n) {
+    INFO("syscall n = %d", n);
+    if (n == 186) {
+        // gettid
+        return 1;
+    }
+
+    return 0;
 }
 
-void sysconf() {
-    NYI();
+int sysconf() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void tcgetattr() {
-    NYI();
+int tcgetattr() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void tcsetattr() {
-    NYI();
+int tcsetattr() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void timerfd_create() {
-    NYI();
+int timerfd_create() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void timerfd_settime() {
-    NYI();
+int timerfd_settime() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __timezone() {
-    NYI();
+int __timezone() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void timezone() {
-    NYI();
+int timezone() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void tzname() {
-    NYI();
+int tzname() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __umodti3() {
-    NYI();
+int __umodti3() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void uname() {
-    NYI();
+int uname() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void unlink() {
-    NYI();
+int unlink() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void unlinkat() {
-    NYI();
+int unlinkat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void utimensat() {
-    NYI();
+int utimensat() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void wait() {
-    NYI();
+int wait() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
+
+long write(int fd, const void *buf, size_t len) {
+    TRACE("shim: %s(fd=%d, buf=%p, len=%d)", __func__, fd, buf, len);
+    if (fd == 1 || fd == 2) {
+        if (strlen(buf) > len) {
+            WARN_DBG("not a string?");
+            return len;
+        }
+
+        DBG("%s: %s", fd == 1 ? "stdout" : "stderr", buf);
+    }
 
-void write() {
-    NYI();
+    return len;
 }
 
-void __xstat64() {
-    NYI();
+int __xstat64() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }
 
-void __dso_handle() {
-    NYI();
+int __dso_handle() {
+    TRACE("shim: %s", __func__);
+    return 0;
 }

@@ -18,6 +18,16 @@ SECTIONS {
         *(.bootelf_header);
         *(.text);
         *(.text.*);
+
+
+        . = ALIGN(16);
+        __preinit_array = .;
+        *(.preinit_array);
+        __preinit_array_end = .;
+        __init_array = .;
+        *(.init_array);
+        __init_array_end = .;
+
         __text_end = .;
     } :text
 
@@ -35,7 +45,7 @@ SECTIONS {
 
         . = ALIGN(16);
         __stack = .;
-        . += 0x4000;
+        . += 0x10000;
         __stack_end = .;
     } :data
 

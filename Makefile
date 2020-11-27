@@ -343,7 +343,8 @@ $(foreach server, $(boot_task_name) $(servers), \
 	$(CC) $(CFLAGS) -c -o $(@) $<
 
 $(BUILD_DIR)/%.debug.elf: tools/nm2symbols.py \
-		tools/embed-symbols.py libs/resea/arch/$(ARCH)/user.ld Makefile
+		tools/embed-symbols.py libs/resea/arch/$(ARCH)/user.ld Makefile \
+		$(external-objs-y)
 	$(PROGRESS) "LD" $(@)
 	$(LD) $(LDFLAGS) --script=libs/resea/arch/$(ARCH)/user.ld \
 		-Map $(@:.debug.elf=.map) -o $(@).tmp $(objs) $(external-objs-y)

@@ -101,6 +101,8 @@ void x64_handle_interrupt(uint8_t vec, struct iframe *frame) {
                 lock();
             }
 
+            // TRACE("");
+            // dump_frame(frame);
             handle_page_fault(addr, ip, fault);
             break;
         }
@@ -111,7 +113,7 @@ void x64_handle_interrupt(uint8_t vec, struct iframe *frame) {
         default:
             lock();
             if (vec <= 20) {
-                WARN_DBG("Exception #%d\n", vec);
+                WARN_DBG("Exception #%d", vec);
                 dump_frame(frame);
                 if (frame->cs == KERNEL_CS) {
                     PANIC("Exception #%d occurred in the kernel space!", vec);
