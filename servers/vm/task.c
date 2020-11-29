@@ -101,12 +101,14 @@ task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace 
     return task->tid;
 }
 
-task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t ip, vaddr_t sp, vaddr_t arg) {
+task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t ip, vaddr_t sp, vaddr_t arg, vaddr_t tls) {
     task_t tid = task_spawn(roommate->file, "", roommate->vmspace, entry);
     struct task *task = task_lookup(tid);
     task->thread_info.sp = sp;
     task->thread_info.ip = ip;
     task->thread_info.arg = arg;
+    task->thread_info.tls = tls;
+    task->thread_info.task = tid;
     return tid;
 }
 

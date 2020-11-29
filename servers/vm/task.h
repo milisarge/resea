@@ -34,10 +34,12 @@ struct task {
     char waiting_for[SERVICE_NAME_LEN];
     list_t watchers;
 
-    __packed struct {
+    struct __packed {
         vaddr_t ip;
         vaddr_t sp;
         vaddr_t arg;
+        vaddr_t tls;
+        task_t task;
     } thread_info;
 };
 
@@ -55,7 +57,7 @@ struct task_watcher {
 extern struct task *vm_task;
 
 task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace *vmspace, vaddr_t entry);
-task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t ip, vaddr_t sp, vaddr_t arg);
+task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t ip, vaddr_t sp, vaddr_t arg, vaddr_t tls);
 task_t task_spawn_by_cmdline(const char *name_with_cmdline);
 struct task *task_lookup(task_t tid);
 void task_kill(struct task *task);

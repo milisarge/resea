@@ -23,10 +23,16 @@ pthread_thread_entry:
     //     vaddr_t ip;
     //     vaddr_t sp;
     //     vaddr_t arg;
+    //     vaddr_t tls;
+    //     task_t task;
     // } thread_info;
-    mov rax, [__thread_info + 0]
-    mov rsp, [__thread_info + 8]
-    mov rdi, [__thread_info + 16]
     mov rbp, 0
+    mov rsp, [__thread_info + 8]
+
+    mov rdi, [__thread_info + 24]
+    call pthread_before_start_routine
+
+    mov rax, [__thread_info + 0]
+    mov rdi, [__thread_info + 16]
     call rax
     ud2

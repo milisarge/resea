@@ -5,5 +5,7 @@
 typedef unsigned long int pthread_t;
 // unused
 typedef char pthread_attr_t;
+// 1-origin integer
+typedef unsigned int pthread_key_t;
 
 #endif

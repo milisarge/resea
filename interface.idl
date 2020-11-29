@@ -54,7 +54,7 @@ namespace task {
     /// Launches a task.
     rpc launch(name_and_cmdline: str) -> (task: task);
     /// Launches a task in the same memory space.
-    rpc spawn_thread(roommate: task, entry: vaddr, ip: vaddr, sp: vaddr, arg: vaddr) -> (task: task);
+    rpc spawn_thread(roommate: task, entry: vaddr, ip: vaddr, sp: vaddr, arg: vaddr, tls: vaddr) -> (task: task);
     /// Watches a task. If the task exits, the watcher task receives an async
     /// message `task.exited`.
     rpc watch(task: task) -> ();
