@@ -13,7 +13,7 @@ index 7868f0c14..bcb2c88ec 100644
 +  visibility = [ ":*" ]
 +  output_name = "flutter_engine_static"
 +  complete_static_lib = true
-+  deps = [ ":embedder", ":copy_headers", "//third_party/+libcxx" ]
++  deps = [ ":embedder", ":copy_headers", "//third_party/libcxx" ]
 +  public_configs = [ "//flutter:config" ]
 +}
 ```
