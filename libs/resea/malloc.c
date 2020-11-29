@@ -86,8 +86,6 @@ void *do_malloc(size_t size) {
         size = 1;
     }
 
-    DBG("malloc(%d)", size);
-
     // Align up to 16-bytes boundary. If the size is less than 16 (including
     // size == 0), allocate 16 bytes.
     size = ALIGN_UP(size, 16);

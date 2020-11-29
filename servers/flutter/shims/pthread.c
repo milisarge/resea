@@ -52,47 +52,12 @@ int pthread_cond_wait() {
     return 0;
 }
 
-static uint8_t *brk_crnt = NULL, *brk_end = NULL;
-
-void *do_malloc(size_t size);
-void do_free(void *ptr);
-
-void *malloc(size_t size) {
-    TRACE("locking...");
-    return do_malloc(size);
-}
-
-void free(void *ptr) {
-    do_free(ptr);
-}
-
-void *sbrk(long long increment) {
-    TRACE("[%d] shim: %s(%d)", task_self(), __func__, increment);
-    if (!brk_crnt) {
-        size_t new_chunk_len = 32 * 1024 * 1024;
-        struct message m;
-        m.type = VM_ALLOC_PAGES_MSG;
-        m.vm_alloc_pages.num_pages = new_chunk_len / PAGE_SIZE;
-        m.vm_alloc_pages.paddr = 0;
-        ASSERT_OK(ipc_call(INIT_TASK, &m));
-        ASSERT(m.type == VM_ALLOC_PAGES_REPLY_MSG);
-        brk_crnt = (uint8_t *) m.vm_alloc_pages_reply.vaddr;
-        brk_end = brk_crnt + new_chunk_len;
-    }
-
-    if ((vaddr_t) brk_crnt + increment >= (vaddr_t) brk_end) {
-        PANIC("out of brk");
-    }
-
-    brk_crnt += increment;
-    return brk_crnt;
-}
-
+// In asm.S.
 void pthread_thread_entry(void);
 
 void malloc_init_with(void *heap, size_t heap_size);
 void pthread_before_start_routine(void) {
-    struct tls *tls = current_tls();
+    // struct tls *tls = current_tls();
 
     // // Yse the thread-local heap area so that we don't need to add locks in the
     // // standard library.
@@ -164,6 +129,80 @@ void init_pthread_shims(void) {
     __thread_info.tls = (vaddr_t) tls;
 }
 
+int pthread_mutex_destroy(pthread_mutex_t *mutex) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    return 0;
+}
+
+int pthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_t *restrict attr) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    *mutex = PTHREAD_MUTEX_INITIALIZER;
+    return 0;
+}
+
+int pthread_mutex_lock(pthread_mutex_t *mutex) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    while (!__sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_UNLOCKED, PTHREAD_MUTEX_LOCKED)) {
+        __asm__ __volatile__("pause");
+    }
+    return 0;
+}
+
+int pthread_mutex_trylock(pthread_mutex_t *mutex) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    if (__sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_UNLOCKED, PTHREAD_MUTEX_LOCKED)) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+int pthread_mutex_unlock(pthread_mutex_t *mutex) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    __sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_LOCKED, PTHREAD_MUTEX_UNLOCKED);
+    return 0;
+}
+
+static uint8_t *brk_crnt = NULL, *brk_end = NULL;
+
+void *do_malloc(size_t size);
+void do_free(void *ptr);
+pthread_mutex_t malloc_lock = PTHREAD_MUTEX_INITIALIZER;
+
+void *malloc(size_t size) {
+    pthread_mutex_lock(&malloc_lock);
+    void *ptr = do_malloc(size);
+    pthread_mutex_unlock(&malloc_lock);
+    return ptr;
+}
+
+void free(void *ptr) {
+    pthread_mutex_lock(&malloc_lock);
+    do_free(ptr);
+    pthread_mutex_unlock(&malloc_lock);
+}
+
+void *sbrk(long long increment) {
+    TRACE("[%d] shim: %s(%d)", task_self(), __func__, increment);
+    if (!brk_crnt) {
+        size_t new_chunk_len = 32 * 1024 * 1024;
+        struct message m;
+        m.type = VM_ALLOC_PAGES_MSG;
+        m.vm_alloc_pages.num_pages = new_chunk_len / PAGE_SIZE;
+        m.vm_alloc_pages.paddr = 0;
+        ASSERT_OK(ipc_call(INIT_TASK, &m));
+        ASSERT(m.type == VM_ALLOC_PAGES_REPLY_MSG);
+        brk_crnt = (uint8_t *) m.vm_alloc_pages_reply.vaddr;
+        brk_end = brk_crnt + new_chunk_len;
+    }
+
+    if ((vaddr_t) brk_crnt + increment >= (vaddr_t) brk_end) {
+        PANIC("out of brk");
+    }
+
+    brk_crnt += increment;
+    return brk_crnt;
+}
 // --------------------------------------------------------------------
 
 int pthread_attr_destroy() {
@@ -254,31 +293,6 @@ int pthread_mutexattr_init() {
 
 int pthread_mutexattr_settype() {
     TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int pthread_mutex_destroy() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int pthread_mutex_init() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int pthread_mutex_lock() {
-    TRACE("pthread_mutex_lock");
-    return 0;
-}
-
-int pthread_mutex_trylock() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int pthread_mutex_unlock() {
-    TRACE("pthread_mutex_unlock");
     return 0;
 }
 
