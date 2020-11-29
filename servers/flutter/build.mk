@@ -4,8 +4,7 @@ objs-y := main.o flutter_engine.o libc_shims.o glibc_symbols.o
 
 SYSROOT_DIR := ~/src/flutter/mysdk/sysroot
 
-flutter_build := linux_debug_x64
-# flutter_build := linux_release_x64
+flutter_build := linux_release_x64
 
 external-objs-y := \
 	/home/seiya/flutter/src/out/$(flutter_build)/obj/flutter/shell/platform/embedder/libflutter_engine_static2.a \

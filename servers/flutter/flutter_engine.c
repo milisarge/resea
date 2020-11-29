@@ -125,54 +125,58 @@ const char *const argv[argc + 1] = {
     NULL,
 };
 
+
+static FlutterRendererConfig config = {
+    .type = kSoftware,
+    .software = {
+        .struct_size = sizeof(FlutterSoftwareRendererConfig),
+        .surface_present_callback = surface_present_callback,
+    },
+};
+
+static FlutterTaskRunnerDescription task_runner = {
+    .struct_size = sizeof(FlutterTaskRunnerDescription),
+    .user_data = NULL,
+    .runs_task_on_current_thread_callback = runs_task_on_current_thread_callback,
+    .post_task_callback = post_task_callback,
+};
+
+static FlutterProjectArgs args = {
+    .struct_size = sizeof(FlutterProjectArgs),
+    .assets_path = "/assets/",
+    .icu_data_path = "/icu_data/",
+    .command_line_argc = argc,
+    .command_line_argv = argv,
+    .platform_message_callback = platform_message_callback,
+    .vm_snapshot_data = NULL,
+    .vm_snapshot_data_size = 0,
+    .vm_snapshot_instructions = NULL,
+    .vm_snapshot_instructions_size = 0,
+    .isolate_snapshot_data = NULL,
+    .isolate_snapshot_data_size = 0,
+    .isolate_snapshot_instructions = NULL,
+    .isolate_snapshot_instructions_size = 0,
+    .root_isolate_create_callback = NULL,
+    .update_semantics_node_callback = NULL,
+    .update_semantics_custom_action_callback = NULL,
+    .persistent_cache_path = NULL,
+    .is_persistent_cache_read_only = false,
+    .vsync_callback = vsync_callback,
+    .custom_dart_entrypoint = NULL,
+    .custom_task_runners = &(FlutterCustomTaskRunners) {
+        .struct_size = sizeof(FlutterCustomTaskRunners),
+        .render_task_runner = &task_runner,
+        .platform_task_runner = &task_runner,
+    },
+    .shutdown_dart_vm_when_done = true,
+    .compositor = NULL,
+};
+
+static void *user_data = NULL;
 static FlutterEngine engine;
 
 void init(void) {
     call_ctors();
 
-    FlutterRendererConfig config = {
-        .type = kSoftware,
-        .software = {
-            .struct_size = sizeof(FlutterSoftwareRendererConfig),
-            .surface_present_callback = surface_present_callback,
-        },
-    };
-
-    FlutterProjectArgs args = {
-		.struct_size = sizeof(FlutterProjectArgs),
-		.assets_path = "/assets/",
-		.icu_data_path = "/icu_data/",
-		.command_line_argc = argc,
-		.command_line_argv = argv,
-		.platform_message_callback = platform_message_callback,
-		.vm_snapshot_data = NULL,
-		.vm_snapshot_data_size = 0,
-		.vm_snapshot_instructions = NULL,
-		.vm_snapshot_instructions_size = 0,
-		.isolate_snapshot_data = NULL,
-		.isolate_snapshot_data_size = 0,
-		.isolate_snapshot_instructions = NULL,
-		.isolate_snapshot_instructions_size = 0,
-		.root_isolate_create_callback = NULL,
-		.update_semantics_node_callback = NULL,
-		.update_semantics_custom_action_callback = NULL,
-		.persistent_cache_path = NULL,
-		.is_persistent_cache_read_only = false,
-		.vsync_callback = vsync_callback,
-		.custom_dart_entrypoint = NULL,
-		.custom_task_runners = &(FlutterCustomTaskRunners) {
-			.struct_size = sizeof(FlutterCustomTaskRunners),
-			.platform_task_runner = &(FlutterTaskRunnerDescription) {
-				.struct_size = sizeof(FlutterTaskRunnerDescription),
-				.user_data = NULL,
-				.runs_task_on_current_thread_callback = runs_task_on_current_thread_callback,
-				.post_task_callback = post_task_callback,
-			}
-		},
-		.shutdown_dart_vm_when_done = true,
-		.compositor = NULL,
-    };
-
-    void *user_data = NULL;
     FlutterEngineRun(1, &config, &args, user_data, &engine);
 }

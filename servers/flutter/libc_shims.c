@@ -529,12 +529,12 @@ int pthread_cond_timedwait() {
 
 int pthread_cond_wait() {
     TRACE("shim: %s", __func__);
-    OOPS("");
     return 0;
 }
 
 int pthread_create() {
     TRACE("shim: %s", __func__);
+    PANIC("");
     return 0;
 }
 
@@ -554,11 +554,6 @@ int pthread_getspecific() {
 }
 
 int pthread_join() {
-    TRACE("shim: %s", __func__);
-    return 0;
-}
-
-int pthread_kill() {
     TRACE("shim: %s", __func__);
     return 0;
 }
