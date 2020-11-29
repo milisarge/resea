@@ -114,6 +114,7 @@ void x64_handle_interrupt(uint8_t vec, struct iframe *frame) {
             lock();
             if (vec <= 20) {
                 WARN_DBG("Exception #%d", vec);
+                WARN_DBG("caused in %s %d", CURRENT->name, CURRENT->tid);
                 dump_frame(frame);
                 if (frame->cs == KERNEL_CS) {
                     PANIC("Exception #%d occurred in the kernel space!", vec);

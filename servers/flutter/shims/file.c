@@ -44,6 +44,11 @@ long write(int fd, const void *buf, size_t len) {
     return len;
 }
 
+int openat64(int fd, const char *path, int mode) {
+    TRACE("[%d] shim: %s(\"%s\")", task_self(), __func__, path);
+    return 0;
+}
+
 void init_file_shims(void) {
     stdin = _REENT->_stdin;
     stdout = _REENT->_stdout;
