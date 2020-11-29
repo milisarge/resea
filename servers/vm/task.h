@@ -6,6 +6,12 @@
 
 #define SERVICE_NAME_LEN 32
 
+struct vmspace {
+    int ref_count;
+    vaddr_t free_vaddr;
+    list_t page_areas;
+};
+
 /// Task Control Block (TCB).
 struct task {
     bool in_use;
@@ -16,8 +22,7 @@ struct task {
     void *file_header;
     struct elf64_ehdr *ehdr;
     struct elf64_phdr *phdrs;
-    vaddr_t free_vaddr;
-    list_t page_areas;
+    struct vmspace *vmspace;
     vaddr_t ool_buf;
     size_t ool_len;
     task_t received_ool_from;
@@ -28,6 +33,11 @@ struct task {
     struct message ool_sender_m;
     char waiting_for[SERVICE_NAME_LEN];
     list_t watchers;
+
+    __packed struct {
+        vaddr_t sp;
+        vaddr_t arg;
+    } thread_info;
 };
 
 struct service {
@@ -43,7 +53,8 @@ struct task_watcher {
 
 extern struct task *vm_task;
 
-task_t task_spawn(struct bootfs_file *file, const char *cmdline);
+task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace *vmspace, vaddr_t entry);
+task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t sp, vaddr_t arg);
 task_t task_spawn_by_cmdline(const char *name_with_cmdline);
 struct task *task_lookup(task_t tid);
 void task_kill(struct task *task);

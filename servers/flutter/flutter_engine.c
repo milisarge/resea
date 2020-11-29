@@ -125,7 +125,6 @@ const char *const argv[argc + 1] = {
     NULL,
 };
 
-
 static FlutterRendererConfig config = {
     .type = kSoftware,
     .software = {

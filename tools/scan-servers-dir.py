@@ -15,7 +15,6 @@ def server_dir_lint(server_dir: Path):
         error(f"The correct server name definition (name := {server_name}) "
             "not found in {server_dir}")
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--names", action="store_true")
@@ -26,7 +25,11 @@ def main():
     for (server_dir, dirs, files) in os.walk("servers"):
         if "build.mk" not in files:
             continue
+
         server_dir = Path(server_dir)
+        if any([(d / "build.mk").exists() for d in server_dir.parents]):
+            continue
+
         server_dir_lint(server_dir)
         servers[server_dir.stem] = server_dir
 

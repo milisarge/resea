@@ -36,6 +36,8 @@ SECTIONS {
         *(.rodata.*);
     } :text
 
+    /* TODO: Make sure :text won't overlaps with this area. */
+    __thread_info = 0x02ffe000;
     __cmdline = 0x02fff000;
 
     . = 0x03000000;

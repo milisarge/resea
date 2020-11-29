@@ -3,12 +3,13 @@
 #include <string.h>
 
 void init(void);
-void init_shims(void);
+void init_file_shims(void);
+
 void main(void) {
     TRACE("starting...");
 
     INFO("ready");
-    init_shims();
+    init_file_shims();
     init();
     INFO("successfully initialized flutter!");
 }

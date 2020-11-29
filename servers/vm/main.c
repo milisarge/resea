@@ -53,7 +53,7 @@ static void spawn_servers(void) {
             size_t len = strlen(file->name);
             if (!strncmp(file->name, startups, len)
                 && (startups[len] == '\0' || startups[len] == ' ')) {
-                task_spawn(file, "");
+                task_spawn(file, "", NULL, 0);
                 num_launched++;
                 break;
             }
@@ -254,6 +254,27 @@ void main(void) {
 
                 r.type = TASK_LAUNCH_REPLY_MSG;
                 r.task_launch_reply.task = task_or_err;
+                ipc_reply(m.src, &r);
+                break;
+            }
+            case TASK_SPAWN_THREAD_MSG: {
+                struct task *roommate = task_lookup(m.task_spawn_thread.roommate);
+                if (!roommate) {
+                    ipc_reply_err(m.src, ERR_INVALID_TASK);
+                    break;
+                }
+
+                vaddr_t entry = m.task_spawn_thread.entry;
+                vaddr_t sp = m.task_spawn_thread.sp;
+                vaddr_t arg = m.task_spawn_thread.arg;
+                task_t task_or_err = thread_spawn(roommate, entry, sp, arg);
+                if (IS_ERROR(task_or_err)) {
+                    ipc_reply_err(m.src, task_or_err);
+                    break;
+                }
+
+                r.type = TASK_SPAWN_THREAD_REPLY_MSG;
+                r.task_spawn_thread_reply.task = task_or_err;
                 ipc_reply(m.src, &r);
                 break;
             }

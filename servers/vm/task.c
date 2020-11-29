@@ -25,7 +25,7 @@ struct task *task_lookup(task_t tid) {
     return task;
 }
 
-static void init_task_struct(struct task *task, const char *name,
+static void init_task_struct(struct task *task, struct vmspace *vmspace, const char *name,
     struct bootfs_file *file, void *file_header, struct elf64_ehdr *ehdr,
     const char *cmdline) {
     task->in_use = true;
@@ -38,7 +38,18 @@ static void init_task_struct(struct task *task, const char *name,
         task->phdrs = NULL;
     }
 
-    task->free_vaddr = (vaddr_t) __free_vaddr;
+    if (vmspace) {
+        task->vmspace = vmspace;
+        task->vmspace->ref_count++;
+    } else {
+        task->vmspace = malloc(sizeof(*task->vmspace));
+        task->vmspace->free_vaddr = (vaddr_t) __free_vaddr;
+        task->vmspace->ref_count = 0;
+        list_init(&task->vmspace->page_areas);
+    }
+
+    task->thread_info.sp = 0;
+    task->thread_info.arg = 0;
     task->ool_buf = 0;
     task->ool_len = 0;
     task->received_ool_buf = 0;
@@ -49,11 +60,10 @@ static void init_task_struct(struct task *task, const char *name,
     strncpy(task->name, name, sizeof(task->name));
     strncpy(task->cmdline, cmdline, sizeof(task->cmdline));
     strncpy(task->waiting_for, "", sizeof(task->waiting_for));
-    list_init(&task->page_areas);
     list_init(&task->watchers);
 }
 
-task_t task_spawn(struct bootfs_file *file, const char *cmdline) {
+task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace *vmspace, vaddr_t entry) {
     TRACE("launching %s...", file->name);
 
     // Look for an unused task ID.
@@ -79,13 +89,25 @@ task_t task_spawn(struct bootfs_file *file, const char *cmdline) {
         return ERR_NOT_ACCEPTABLE;
     }
 
+    if (!entry) {
+        entry = ehdr->e_entry;
+    }
+
     // Create a new task for the server.
     error_t err =
-        task_create(task->tid, file->name, ehdr->e_entry, task_self(), TASK_ALL_CAPS);
+        task_create(task->tid, file->name, entry, task_self(), TASK_ALL_CAPS);
     ASSERT_OK(err);
 
-    init_task_struct(task, file->name, file, file_header, ehdr, cmdline);
+    init_task_struct(task, vmspace, file->name, file, file_header, ehdr, cmdline);
     return task->tid;
+}
+
+task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t sp, vaddr_t arg) {
+    task_t tid = task_spawn(roommate->file, "", roommate->vmspace, entry);
+    struct task *task = task_lookup(tid);
+    task->thread_info.sp = sp;
+    task->thread_info.arg = arg;
+    return tid;
 }
 
 task_t task_spawn_by_cmdline(const char *name_with_cmdline) {
@@ -114,7 +136,7 @@ task_t task_spawn_by_cmdline(const char *name_with_cmdline) {
     }
 
     free(name);
-    return task_spawn(file, cmdline);
+    return task_spawn(file, cmdline, NULL, 0);
 }
 
 void task_kill(struct task *task) {
@@ -127,15 +149,20 @@ void task_kill(struct task *task) {
         free(w);
     }
 
-    LIST_FOR_EACH(pa, &task->page_areas, struct page_area, next) {
-        free_page_area(pa);
-    }
-
     LIST_FOR_EACH (service, &services, struct service, next) {
         if (service->task == task->tid) {
             list_remove(&service->next);
             free(service);
         }
+    }
+
+    task->vmspace->ref_count--;
+    if (!task->vmspace->ref_count) {
+        LIST_FOR_EACH(pa, &task->vmspace->page_areas, struct page_area, next) {
+            free_page_area(pa);
+        }
+
+        free(task->vmspace);
     }
 
     task_destroy(task->tid);
@@ -222,6 +249,6 @@ void task_init(void) {
 
     // Initialize a task struct for myself.
     vm_task = &tasks[INIT_TASK - 1];
-    init_task_struct(vm_task, "vm", NULL, NULL, NULL, "");
+    init_task_struct(vm_task, NULL, "vm", NULL, NULL, NULL, "");
     list_init(&services);
 }

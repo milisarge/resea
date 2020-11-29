@@ -9,6 +9,7 @@
 #include "bootfs.h"
 
 static vaddr_t tmp_page = 0;
+extern char __thread_info[];
 extern char __cmdline[];
 extern char __zeroed_pages[];
 extern char __zeroed_pages_end[];
@@ -19,14 +20,14 @@ static paddr_t alloc_pages(struct task *task, vaddr_t vaddr, size_t num_pages) {
     area->vaddr = vaddr;
     area->paddr = pages_alloc(num_pages);
     area->num_pages = num_pages;
-    list_push_back(&task->page_areas, &area->next);
+    list_push_back(&task->vmspace->page_areas, &area->next);
     return area->paddr;
 }
 
 /// Allocates a virtual address space by so-called the bump pointer allocation
 /// algorithm.
 static vaddr_t alloc_virt_pages(struct task *task, size_t num_pages) {
-    vaddr_t vaddr = task->free_vaddr;
+    vaddr_t vaddr = task->vmspace->free_vaddr;
     size_t size = num_pages * PAGE_SIZE;
 
     if (vaddr + size >= (vaddr_t) __free_vaddr_end) {
@@ -35,7 +36,7 @@ static vaddr_t alloc_virt_pages(struct task *task, size_t num_pages) {
         return 0;
     }
 
-    task->free_vaddr += size;
+    task->vmspace->free_vaddr += size;
     return vaddr;
 }
 
@@ -46,7 +47,7 @@ void free_page_area(struct page_area *area) {
 }
 
 static void free_pages(struct task *task, paddr_t paddr) {
-    LIST_FOR_EACH(area, &task->page_areas, struct page_area, next) {
+    LIST_FOR_EACH(area, &task->vmspace->page_areas, struct page_area, next) {
         if (area->paddr == paddr) {
             free_page_area(area);
             return;
@@ -98,12 +99,12 @@ error_t alloc_phy_pages(struct task *task, vaddr_t *vaddr, paddr_t *paddr,
     area->vaddr = *vaddr;
     area->paddr = *paddr;
     area->num_pages = num_pages;
-    list_push_back(&task->page_areas, &area->next);
+    list_push_back(&task->vmspace->page_areas, &area->next);
     return OK;
 }
 
 paddr_t vaddr2paddr(struct task *task, vaddr_t vaddr) {
-    LIST_FOR_EACH (area, &task->page_areas, struct page_area, next) {
+    LIST_FOR_EACH (area, &task->vmspace->page_areas, struct page_area, next) {
         if (area->vaddr <= vaddr
             && vaddr < area->vaddr + area->num_pages * PAGE_SIZE) {
             return area->paddr + (vaddr - area->vaddr);
@@ -166,7 +167,17 @@ paddr_t pager(struct task *task, vaddr_t vaddr, vaddr_t ip, unsigned fault) {
         return paddr;
     }
 
-    LIST_FOR_EACH (area, &task->page_areas, struct page_area, next) {
+    // The `cmdline` for main().
+    if (vaddr == (vaddr_t) __thread_info) {
+        paddr_t paddr = alloc_pages(task, vaddr, 1);
+        ASSERT_OK(map_page(vm_task, tmp_page, paddr, MAP_W, false));
+        memset((void *) tmp_page, 0, PAGE_SIZE);
+        DEBUG_ASSERT(sizeof(task->thread_info) <= PAGE_SIZE);
+        memcpy((void *) tmp_page, &task->thread_info, sizeof(task->thread_info));
+        return paddr;
+    }
+
+    LIST_FOR_EACH (area, &task->vmspace->page_areas, struct page_area, next) {
         if (area->vaddr <= vaddr
             && vaddr < area->vaddr + area->num_pages * PAGE_SIZE) {
             return area->paddr + (vaddr - area->vaddr);
