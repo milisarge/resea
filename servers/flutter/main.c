@@ -10,5 +10,5 @@ void main(void) {
     INFO("ready");
     init_shims();
     init();
-    PANIC("returned from flutter!");
+    INFO("successfully initialized flutter!");
 }
