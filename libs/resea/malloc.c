@@ -1,7 +1,10 @@
 #include <list.h>
 #include <resea/malloc.h>
+#include <resea/ipc.h>
 #include <resea/printf.h>
 #include <string.h>
+
+#ifndef NO_MALLOC
 
 #define NUM_BINS 16
 extern char __heap[];
@@ -78,15 +81,16 @@ static int get_bin_idx_from_size(size_t size) {
     return -1;
 }
 
-void *malloc(size_t size) {
+void *do_malloc(size_t size) {
     if (!size) {
         size = 1;
     }
 
+    DBG("malloc(%d)", size);
+
     // Align up to 16-bytes boundary. If the size is less than 16 (including
     // size == 0), allocate 16 bytes.
     size = ALIGN_UP(size, 16);
-
     int bin_idx = get_bin_idx_from_size(size);
 
     if (bin_idx != -1 && bins[bin_idx] != NULL) {
@@ -152,10 +156,11 @@ static struct malloc_chunk *get_chunk_from_ptr(void *ptr) {
     return chunk;
 }
 
-void free(void *ptr) {
+void do_free(void *ptr) {
     if (!ptr) {
         return;
     }
+
     struct malloc_chunk *chunk = get_chunk_from_ptr(ptr);
     if (chunk->magic == MALLOC_FREE) {
         PANIC("double-free bug!");
@@ -173,9 +178,9 @@ void free(void *ptr) {
     bins[bin_idx] = chunk;
 }
 
-void *realloc(void *ptr, size_t size) {
+static void *do_realloc(void *ptr, size_t size) {
     if (!ptr) {
-        return malloc(size);
+        return do_malloc(size);
     }
 
     struct malloc_chunk *chunk = get_chunk_from_ptr(ptr);
@@ -185,7 +190,7 @@ void *realloc(void *ptr, size_t size) {
     }
 
     // There's not enough room. Allocate a new space and copy old data.
-    void *new_ptr = malloc(size);
+    void *new_ptr = do_malloc(size);
     memcpy(new_ptr, ptr, chunk->size);
     free(ptr);
     return new_ptr;
@@ -201,6 +206,25 @@ char *strdup(const char *s) {
     return strndup(s, strlen(s));
 }
 
+void malloc_init_with(void *heap, size_t heap_size) {
+    memset(&bins, 0, sizeof(bins));
+    insert(heap, heap_size);
+}
+
+__weak void *malloc(size_t size) {
+    return do_malloc(size);
+}
+
+__weak void free(void *ptr) {
+    do_free(ptr);
+}
+
+__weak void *realloc(void *ptr, size_t size) {
+    return do_realloc(ptr, size);
+}
+
 void malloc_init(void) {
     insert(__heap, (size_t) __heap_end - (size_t) __heap);
 }
+
+#endif

@@ -4,12 +4,14 @@
 
 void init(void);
 void init_file_shims(void);
+void init_pthread_shims(void);
 
 void main(void) {
     TRACE("starting...");
 
     INFO("ready");
     init_file_shims();
+    init_pthread_shims();
     init();
     INFO("successfully initialized flutter!");
 }

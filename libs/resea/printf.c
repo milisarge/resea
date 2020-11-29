@@ -31,7 +31,7 @@ static void vprintf_printchar(__unused struct vprintf_context *ctx, char ch) {
 }
 
 /// Prints a message. See vprintf() for detailed formatting specifications.
-void printf(const char *fmt, ...) {
+__weak void printf(const char *fmt, ...) {
     struct vprintf_context ctx = { .printchar = vprintf_printchar };
     va_list vargs;
     va_start(vargs, fmt);

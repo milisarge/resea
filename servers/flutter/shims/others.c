@@ -480,11 +480,6 @@ int rewinddir() {
     return 0;
 }
 
-int sbrk() {
-    TRACE("shim: %s", __func__);
-    return 0;
-}
-
 int sched_yield() {
     TRACE("shim: %s", __func__);
     return 0;

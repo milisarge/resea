@@ -20,13 +20,23 @@ struct __FILE *stdin = NULL;
 struct __FILE *stdout = NULL;
 struct __FILE *stderr = NULL;
 
+void printchar(char ch);
 long write(int fd, const void *buf, size_t len) {
-    printf("\e[1;95m");
     if (fd == 1 || fd == 2) {
+        printchar('\e');
+        printchar('[');
+        printchar('1');
+        printchar(';');
+        printchar('9');
+        printchar('5');
+        printchar('m');
         for (size_t i = 0; i < len; i++) {
-            printf("%c", *((char *) buf + i));
+            printchar(*((char *) buf + i));
         }
-        printf("\e[0m");
+        printchar('\e');
+        printchar('[');
+        printchar('0');
+        printchar('m');
     } else {
         WARN_DBG("shim: %s(fd=%d, buf=%p, len=%d)", __func__, fd, buf, len);
     }

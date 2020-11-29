@@ -52,9 +52,10 @@ index 5f299d7..470617f 100644
 ./flutter/tools/gn --clang --lto --embedder-for-target --target-os linux --linux-cpu x64 --runtime-mode release --no-stripped --no-goma
 ```
 
+## newlib-4.0.0
 ```
-~/newlib-4.0.0/build
-$ ../newlib/configure --disable-multilib --disable-shared --target=x86_64-elf --disable-newlib-supplied-syscalls CFLAGS="-D_FORTIFY_SOURCE=0 -fno-stack-protector"
+mkdir -p build && cd build
+../newlib/configure --disable-multilib --disable-shared --target=x86_64-elf --disable-newlib-supplied-syscalls CFLAGS="-D_FORTIFY_SOURCE=0 -fno-stack-protector"
 ```
 
 ## Debugging Notes

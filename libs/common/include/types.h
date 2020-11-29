@@ -160,6 +160,7 @@ typedef uint8_t notifications_t;
 #define NOTIFY_IRQ      (1 << 1)
 #define NOTIFY_ABORTED  (1 << 2)
 #define NOTIFY_ASYNC    (1 << 3)
+#define NOTIFY_WAKE     (1 << 4)
 
 // Page Fault exception error codes.
 #define EXP_PF_PRESENT (1 << 0)

@@ -69,9 +69,11 @@ $(eval build_dir := $(2)/$(1))
 $(eval subdirs-y :=)
 $(eval cflags-y :=)
 $(eval global-cflags-y :=)
+$(eval external-objs-y :=)
 $(eval include $(1)/build.mk)
 $(eval build_mks += $(1)/build.mk)
 $(eval objs += $(addprefix $(2)/$(1)/, $(objs-y)))
+$(eval external-objs += $(external-objs-y))
 $(eval libs += $(libs-y))
 $(eval cflags += $(cflags-y))
 $(eval CFLAGS += $(global-cflags-y))
@@ -310,6 +312,7 @@ define server-build-rule
 $(eval server_dir := $(shell tools/scan-servers-dir.py --dir $(1)))
 $(eval name :=)
 $(eval objs :=)
+$(eval external-objs :=)
 $(eval libs := $(builtin_libs))
 $(eval cflags :=)
 $(eval build_mks :=)
@@ -321,7 +324,7 @@ $(eval $(BUILD_DIR)/$(1)/__name__.c: name := $(name))
 $(eval $(BUILD_DIR)/$(1).elf: name := $(name))
 $(eval $(BUILD_DIR)/$(1).debug.elf: name := $(name))
 $(eval $(BUILD_DIR)/$(1).debug.elf: server_dir := $(server_dir))
-$(eval $(BUILD_DIR)/$(1).debug.elf: objs := $(objs))
+$(eval $(BUILD_DIR)/$(1).debug.elf: objs := $(objs) $(external-objs))
 $(eval $(BUILD_DIR)/$(1).debug.elf: objs += $(if $(rust), $(BUILD_DIR)/rust/$(name).a))
 $(eval $(BUILD_DIR)/$(1).debug.elf: $(objs) $(if $(rust), $(BUILD_DIR)/rust/$(name).a) $(build_mks))
 $(eval $(objs): CFLAGS += $(cflags))
@@ -343,11 +346,10 @@ $(foreach server, $(boot_task_name) $(servers), \
 	$(CC) $(CFLAGS) -c -o $(@) $<
 
 $(BUILD_DIR)/%.debug.elf: tools/nm2symbols.py \
-		tools/embed-symbols.py libs/resea/arch/$(ARCH)/user.ld Makefile \
-		$(external-objs-y)
+		tools/embed-symbols.py libs/resea/arch/$(ARCH)/user.ld Makefile
 	$(PROGRESS) "LD" $(@)
 	$(LD) $(LDFLAGS) --script=libs/resea/arch/$(ARCH)/user.ld \
-		-Map $(@:.debug.elf=.map) -o $(@).tmp $(objs) $(external-objs-y)
+		-Map $(@:.debug.elf=.map) -o $(@).tmp $(objs)
 	$(NM) $(@).tmp | ./tools/nm2symbols.py > $(BUILD_DIR)/$(name).symbols
 	$(PROGRESS) "SYMBOLS" $(BUILD_DIR)/$(name).debug.elf
 	./tools/embed-symbols.py $(BUILD_DIR)/$(name).symbols $(@).tmp
