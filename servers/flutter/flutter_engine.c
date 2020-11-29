@@ -177,6 +177,6 @@ static FlutterEngine engine;
 
 void init(void) {
     call_ctors();
-
+    INFO("Running FlutterEngineRun...");
     FlutterEngineRun(1, &config, &args, user_data, &engine);
 }

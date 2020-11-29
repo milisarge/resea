@@ -889,17 +889,14 @@ int wait() {
 }
 
 long write(int fd, const void *buf, size_t len) {
-    TRACE("shim: %s(fd=%d, buf=%p, len=%d)", __func__, fd, buf, len);
+    printf("\e[1;95m");
     if (fd == 1 || fd == 2) {
-        if (len == 1 && *((char *) buf) == '\n') {
-            return len;
-        }
-        printf("\e[1;95m%s: -------------------------------------------------\n",
-            fd == 1 ? "stdout" : "stderr");
         for (size_t i = 0; i < len; i++) {
             printf("%c", *((char *) buf + i));
         }
-        printf("\e[0m\n");
+        printf("\e[0m");
+    } else {
+        WARN_DBG("shim: %s(fd=%d, buf=%p, len=%d)", __func__, fd, buf, len);
     }
 
     return len;
