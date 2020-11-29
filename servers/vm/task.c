@@ -48,8 +48,6 @@ static void init_task_struct(struct task *task, struct vmspace *vmspace, const c
         list_init(&task->vmspace->page_areas);
     }
 
-    task->thread_info.sp = 0;
-    task->thread_info.arg = 0;
     task->ool_buf = 0;
     task->ool_len = 0;
     task->received_ool_buf = 0;
@@ -61,6 +59,7 @@ static void init_task_struct(struct task *task, struct vmspace *vmspace, const c
     strncpy(task->cmdline, cmdline, sizeof(task->cmdline));
     strncpy(task->waiting_for, "", sizeof(task->waiting_for));
     list_init(&task->watchers);
+    memset(&task->thread_info, 0, sizeof(task->thread_info));
 }
 
 task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace *vmspace, vaddr_t entry) {
@@ -102,10 +101,11 @@ task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace 
     return task->tid;
 }
 
-task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t sp, vaddr_t arg) {
+task_t thread_spawn(struct task *roommate, vaddr_t entry, vaddr_t ip, vaddr_t sp, vaddr_t arg) {
     task_t tid = task_spawn(roommate->file, "", roommate->vmspace, entry);
     struct task *task = task_lookup(tid);
     task->thread_info.sp = sp;
+    task->thread_info.ip = ip;
     task->thread_info.arg = arg;
     return tid;
 }

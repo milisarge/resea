@@ -72,9 +72,12 @@ int pthread_cond_timedwait() {
 
 int pthread_cond_wait() {
     TRACE("shim: %s", __func__);
-    PANIC("");
+    struct message m;
+    ipc_recv(IPC_ANY, &m);
     return 0;
 }
+
+void pthread_thread_entry(void);
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start)(void *), void *arg) {
@@ -83,9 +86,10 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
     struct message m;
     m.type = TASK_SPAWN_THREAD_MSG;
     m.task_spawn_thread.roommate = task_self();
-    m.task_spawn_thread.entry = (vaddr_t) start;
-    m.task_spawn_thread.arg = (vaddr_t) arg;
+    m.task_spawn_thread.entry = (vaddr_t) pthread_thread_entry;
+    m.task_spawn_thread.ip = (vaddr_t) start;
     m.task_spawn_thread.sp = (vaddr_t) malloc(stack_size) + stack_size;
+    m.task_spawn_thread.arg = (vaddr_t) arg;
     ASSERT_OK(ipc_call(INIT_TASK, &m));
     *thread = m.task_spawn_thread_reply.task;
     return 0;

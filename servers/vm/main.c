@@ -265,9 +265,10 @@ void main(void) {
                 }
 
                 vaddr_t entry = m.task_spawn_thread.entry;
+                vaddr_t ip = m.task_spawn_thread.ip;
                 vaddr_t sp = m.task_spawn_thread.sp;
                 vaddr_t arg = m.task_spawn_thread.arg;
-                task_t task_or_err = thread_spawn(roommate, entry, sp, arg);
+                task_t task_or_err = thread_spawn(roommate, entry, ip, sp, arg);
                 if (IS_ERROR(task_or_err)) {
                     ipc_reply_err(m.src, task_or_err);
                     break;
