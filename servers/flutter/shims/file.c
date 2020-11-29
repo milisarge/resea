@@ -46,6 +46,20 @@ long write(int fd, const void *buf, size_t len) {
 
 int openat64(int fd, const char *path, int mode) {
     TRACE("[%d] shim: %s(\"%s\")", task_self(), __func__, path);
+    return fd;
+}
+
+int __fxstat64(int vers, int fd, struct stat64 *buf) {
+    TRACE("[%d] shim: %s(fd=%d)", task_self(), __func__, fd);
+    return 0;
+}
+
+int epoll_wait(void) {
+    DBG("[%d] shim: %s", task_self(), __func__);
+    while (true) {
+        struct message m;
+        ipc_recv(IPC_ANY, &m);
+    }
     return 0;
 }
 

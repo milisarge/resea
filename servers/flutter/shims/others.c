@@ -116,11 +116,6 @@ int epoll_ctl() {
     return 0;
 }
 
-int epoll_wait() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
 int __errno_location() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
