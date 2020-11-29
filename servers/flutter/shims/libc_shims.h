@@ -18,4 +18,6 @@ typedef int pthread_mutex_t;
 
 /// unused
 typedef void pthread_mutexattr_t;
+typedef void pthread_cond_t;
+
 #endif

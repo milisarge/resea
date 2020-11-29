@@ -14,8 +14,8 @@ struct __packed thread_info {
 };
 
 #define PTHREAD_KEY_MAX 16
+static int next_tls_key = 0;
 struct tls_data {
-    bool in_use;
     const void *value;
 };
 
@@ -29,27 +29,6 @@ extern struct thread_info __thread_info;
 
 static struct tls *current_tls(void) {
     return (struct tls *) __thread_info.tls;
-}
-
-
-int pthread_cond_init() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int pthread_cond_signal() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    for (task_t task = 0; task < CONFIG_NUM_TASKS; task++) {
-        ipc_notify(task, NOTIFY_WAKE);
-    }
-    return 0;
-}
-
-int pthread_cond_wait() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    struct message m;
-    ipc_recv(IPC_ANY, &m);
-    return 0;
 }
 
 // In asm.S.
@@ -94,23 +73,15 @@ pthread_t pthread_self(void) {
 
 int pthread_key_create(pthread_key_t *key, void (*destructor)(void*)) {
     TRACE("[%d] shim: %s", task_self(), __func__);
-    for (int i = 0; i < PTHREAD_KEY_MAX; i++) {
-        struct tls_data *data = &current_tls()->keys[i];
-        if (!data->in_use) {
-            data->in_use = true;
-            *key = i;
-            return 0;
-        }
-    }
-
-    PANIC("too many tls data");
+    ASSERT(next_tls_key < PTHREAD_KEY_MAX);
+    *key = next_tls_key++;
+    return 0;
 }
 
 int pthread_setspecific(pthread_key_t key, const void *value) {
     TRACE("[%d] shim: %s", task_self(), __func__);
     ASSERT(key < PTHREAD_KEY_MAX);
     struct tls_data *data = &current_tls()->keys[key];
-    ASSERT(data->in_use);
     data->value = value;
     return 0;
 }
@@ -119,7 +90,6 @@ void *pthread_getspecific(pthread_key_t key) {
     TRACE("[%d] shim: %s", task_self(), __func__);
     ASSERT(key < PTHREAD_KEY_MAX);
     struct tls_data *data = &current_tls()->keys[key];
-    ASSERT(data->in_use);
     return (void *) data->value;
 }
 
@@ -160,6 +130,27 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex) {
 int pthread_mutex_unlock(pthread_mutex_t *mutex) {
     TRACE("[%d] shim: %s", task_self(), __func__);
     __sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_LOCKED, PTHREAD_MUTEX_UNLOCKED);
+    return 0;
+}
+
+int pthread_cond_init() {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    return 0;
+}
+
+int pthread_cond_signal() {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    for (task_t task = 0; task < CONFIG_NUM_TASKS; task++) {
+        ipc_notify(task, NOTIFY_WAKE);
+    }
+    return 0;
+}
+
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    pthread_mutex_unlock(mutex);
+    struct message m;
+    ipc_recv(IPC_ANY, &m);
     return 0;
 }
 
@@ -246,7 +237,7 @@ int pthread_condattr_setclock() {
 }
 
 int pthread_cond_broadcast() {
-    TRACE("%s", __func__);
+    TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
 }
 
@@ -269,7 +260,6 @@ int pthread_getattr_np() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
 }
-
 
 int pthread_join() {
     TRACE("[%d] shim: %s", task_self(), __func__);
