@@ -176,6 +176,7 @@ static void *user_data = NULL;
 static FlutterEngine engine;
 
 void init(void) {
+    INFO("Running global constructors...");
     call_ctors();
     INFO("Running FlutterEngineRun...");
     FlutterEngineRun(1, &config, &args, user_data, &engine);
