@@ -1,6 +1,14 @@
 # GUI (Flutter)
 
-```
+```diff
+diff --git a/shell/platform/embedder/BUILD.gn b/shell/platform/embedder/BUILD.gn
+index 7868f0c14..bcb2c88ec 100644
+--- a/shell/platform/embedder/BUILD.gn
++++ b/shell/platform/embedder/BUILD.gn
+@@ -252,6 +252,24 @@ shared_library("flutter_engine_library") {
+   public_configs = [ "//flutter:config" ]
+ }
+
 static_library("flutter_engine_library_static") {
   visibility = [ ":*" ]
   output_name = "flutter_engine_static"
