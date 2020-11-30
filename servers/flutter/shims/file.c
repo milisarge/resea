@@ -169,6 +169,14 @@ int epoll_wait(void) {
     return 0;
 }
 
+
+void *mmap64(void *addr, size_t length, int prot, int flags, int fd, long offset) {
+    TRACE("[%d] shim: %s(fd=%d, off=%d)", task_self(), __func__, fd, offset);
+    struct opened_file *f = lookup_fd(fd);
+    ASSERT(f->embedded);
+    return &f->embedded->data[offset];
+}
+
 void init_file_shims(void) {
     stdin = _REENT->_stdin;
     stdout = _REENT->_stdout;

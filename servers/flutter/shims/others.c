@@ -366,11 +366,6 @@ int mkdirat() {
     return 0;
 }
 
-int mmap64() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
 int mprotect() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
