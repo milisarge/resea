@@ -49,6 +49,18 @@ index 5f299d7..470617f 100644
 ```
 
 ```
+diff --git a/runtime/vm/os_thread.h b/runtime/vm/os_thread.h
+index 675836c13fd..5c26bdd627a 100644
+--- a/runtime/vm/os_thread.h
++++ b/runtime/vm/os_thread.h
+@@ -17,6 +17,10 @@
+ #define HAS_C11_THREAD_LOCAL 1
+ #endif
+
++#undef HAS_C11_THREAD_LOCAL
+```
+
+```
 ./flutter/tools/gn --clang --lto --embedder-for-target --target-os linux --linux-cpu x64 --runtime-mode release --no-stripped --no-goma
 ```
 

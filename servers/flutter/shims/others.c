@@ -146,8 +146,8 @@ int fdopendir() {
     return 0;
 }
 
-int fopen64() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+int fopen64(const char *path, const char *mode) {
+    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
     return 0;
 }
 
@@ -386,8 +386,8 @@ int open() {
     return 0;
 }
 
-int open64() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+int open64(const char *path, int flags) {
+    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
     return 0;
 }
 

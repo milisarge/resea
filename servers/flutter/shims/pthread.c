@@ -83,6 +83,7 @@ int pthread_setspecific(pthread_key_t key, const void *value) {
     ASSERT(key < PTHREAD_KEY_MAX);
     struct tls_data *data = &current_tls()->keys[key];
     data->value = value;
+    OOPS("OK");
     return 0;
 }
 
@@ -194,14 +195,23 @@ void *sbrk(long long increment) {
     brk_crnt += increment;
     return brk_crnt;
 }
-// --------------------------------------------------------------------
 
-int pthread_attr_destroy() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+task_t main_flutter_task = 2; // FIXME:
+extern char __stack[];
+extern char __stack_end[];
+int pthread_attr_getstack(const pthread_attr_t *attr,
+                          void **stackaddr, size_t *stacksize) {
+    OOPS("[%d] shim: %s", task_self(), __func__);
+    if (task_self() == main_flutter_task) {
+        *stackaddr = __stack;
+        *stacksize = (size_t) __stack_end - (size_t) __stack;
+    }
     return 0;
 }
 
-int pthread_attr_getstack() {
+// --------------------------------------------------------------------
+
+int pthread_attr_destroy() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
 }
