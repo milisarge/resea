@@ -140,6 +140,15 @@ static FlutterTaskRunnerDescription task_runner = {
     .post_task_callback = post_task_callback,
 };
 
+extern uint8_t *kDartVmSnapshotInstructions;
+extern size_t kDartVmSnapshotInstructionsSize;
+extern uint8_t *kDartVmSnapshotData;
+extern size_t kDartVmSnapshotDataSize;
+extern uint8_t *kDartIsolateSnapshotInstructions;
+extern size_t kDartIsolateSnapshotInstructionsSize;
+extern uint8_t *kDartIsolateSnapshotData;
+extern size_t kDartIsolateSnapshotDataSize;
+
 static FlutterProjectArgs args = {
     .struct_size = sizeof(FlutterProjectArgs),
     .assets_path = "/assets/",
@@ -177,6 +186,17 @@ static FlutterEngine engine;
 void init(void) {
     INFO("Running global constructors...");
     call_ctors();
+
+
+    args.vm_snapshot_data = kDartVmSnapshotData;
+    args.vm_snapshot_data_size = kDartVmSnapshotDataSize;
+    args.vm_snapshot_instructions = kDartVmSnapshotInstructions;
+    args.vm_snapshot_instructions_size = kDartVmSnapshotInstructionsSize;
+    args.isolate_snapshot_data = kDartIsolateSnapshotData;
+    args.isolate_snapshot_data_size = kDartIsolateSnapshotDataSize;
+    args.isolate_snapshot_instructions = kDartIsolateSnapshotInstructions;
+    args.isolate_snapshot_instructions_size = kDartIsolateSnapshotInstructionsSize;
+
     INFO("Running FlutterEngineRun...");
     FlutterEngineRun(1, &config, &args, user_data, &engine);
 }

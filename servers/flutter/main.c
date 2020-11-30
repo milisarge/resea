@@ -10,9 +10,13 @@ void init_pthread_shims(void);
 extern uint8_t __app_so[];
 
 uint8_t *kDartVmSnapshotInstructions = NULL;
+size_t kDartVmSnapshotInstructionsSize = 0;
 uint8_t *kDartVmSnapshotData = NULL;
+size_t kDartVmSnapshotDataSize = 0;
 uint8_t *kDartIsolateSnapshotInstructions = NULL;
+size_t kDartIsolateSnapshotInstructionsSize = 0;
 uint8_t *kDartIsolateSnapshotData = NULL;
+size_t kDartIsolateSnapshotDataSize = 0;
 
 void parse_app_so(void) {
     struct elf64_ehdr *ehdr = (struct elf64_ehdr *) __app_so;
@@ -40,22 +44,26 @@ void parse_app_so(void) {
 
         const char *name = &strtab[sym->st_name];
         uint8_t *data = &__app_so[sym->st_value];
-        TRACE("app.so: offset=%p, symbol=%s", sym->st_value, name);
+        TRACE("app.so: offset=%p, size=%p, symbol=%s", sym->st_value, sym->st_size, name);
 
         if (!strcmp(name, "_kDartVmSnapshotInstructions")) {
             kDartVmSnapshotInstructions = data;
+            kDartVmSnapshotInstructionsSize = sym->st_size;
             continue;
         }
         if (!strcmp(name, "_kDartVmSnapshotData")) {
             kDartVmSnapshotData = data;
+            kDartVmSnapshotDataSize = sym->st_size;
             continue;
         }
         if (!strcmp(name, "_kDartIsolateSnapshotInstructions")) {
             kDartIsolateSnapshotInstructions = data;
+            kDartIsolateSnapshotInstructionsSize = sym->st_size;
             continue;
         }
         if (!strcmp(name, "_kDartIsolateSnapshotData")) {
             kDartIsolateSnapshotData = data;
+            kDartIsolateSnapshotDataSize = sym->st_size;
             continue;
         }
     }
@@ -68,7 +76,6 @@ void main(void) {
     init_file_shims();
     init_pthread_shims();
     parse_app_so();
-    PANIC("exit");
     init();
     INFO("successfully initialized flutter!");
 }
