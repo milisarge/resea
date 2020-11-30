@@ -1,3 +1,4 @@
+#include <config.h>
 .intel_syntax noprefix
 .text
 
@@ -36,3 +37,15 @@ pthread_thread_entry:
     mov rdi, [__thread_info + 16]
     call rax
     ud2
+
+.rodata
+#ifdef CONFIG_ARCH_ARM64
+.balign 4096
+#else
+.align 4096
+#endif
+
+.global __icu_data, __icu_data_end
+__icu_data:
+    .incbin ICU_DATA_FILE
+__icu_data_end:

@@ -44,15 +44,70 @@ long write(int fd, const void *buf, size_t len) {
     return len;
 }
 
+struct embedded_file {
+    const char *path;
+    unsigned mode;
+    uint8_t *data;
+    uint8_t *data_end;
+    size_t size;
+};
+
 #define FD_BASE 10
 #define FD_MAX 128
 struct opened_file {
     bool in_use;
     int fd;
     char *path;
+    struct embedded_file *embedded;
 };
 
+
 struct opened_file opened_files[FD_MAX];
+
+extern char __icu_data[];
+extern char __icu_data_end[];
+struct embedded_file embedded_files[] = {
+    {
+        .path = "/assets/",
+        .mode = S_IFDIR,
+        .data = NULL,
+        .data_end = NULL,
+        .size = 0
+    },
+    {
+        .path = "/icu_data/icudtl.dat",
+        .mode = S_IFREG,
+        .data = (uint8_t *) __icu_data,
+        .data_end = (uint8_t *) __icu_data_end,
+        .size = 0,
+    },
+    {
+        .path = NULL,
+        .mode = S_IFREG,
+        .data = NULL,
+        .data_end = NULL,
+        .size = 0
+    },
+};
+
+struct embedded_file *lookup_embedded_file(const char *path) {
+    int i = 0;
+    while (embedded_files[i].path) {
+        struct embedded_file *f = &embedded_files[i];
+        if (f->data_end) {
+            f->size = (size_t) f->data_end - (size_t) f->data;
+        }
+
+        if (!strcmp(f->path, path)) {
+            return f;
+        }
+
+        i++;
+    }
+
+    WARN_DBG("unknown file: %s", path);
+    return NULL;
+}
 
 struct opened_file *alloc_fd(const char *path) {
     for (int i = 0; i < FD_MAX; i++) {
@@ -60,6 +115,7 @@ struct opened_file *alloc_fd(const char *path) {
             opened_files[i].in_use = true;
             opened_files[i].fd = i + FD_BASE;
             opened_files[i].path = strdup(path);
+            opened_files[i].embedded = lookup_embedded_file(path);
             return &opened_files[i];
         }
     }
@@ -75,7 +131,6 @@ struct opened_file *lookup_fd(int fd) {
     return f;
 }
 
-# define AT_FDCWD -100
 int openat64(int dirfd, const char *path, int mode) {
     TRACE("[%d] shim: %s(dirfd=%d, path=\"%s\")", task_self(), __func__, dirfd, path);
     ASSERT(dirfd == AT_FDCWD);
@@ -89,22 +144,6 @@ int readlink(const char *path, char *buf, size_t bufsiz) {
     return strlen(buf);
 }
 
-struct stat64 {
-    unsigned long st_dev;
-    unsigned long st_ino;
-    unsigned long st_nlink;
-    unsigned st_mode;
-    unsigned st_uid;
-    unsigned st_gid;
-    unsigned __pad0;
-    unsigned long st_rdev;
-    long st_size;
-    // TODO: Add remaining fields.
-} __packed;
-
-#define S_IFREG   0100000
-#define S_IFDIR   0040000
-
 bool endswith(const char *s, const char *suffix) {
     size_t s_len = strlen(s);
     size_t suffix_len = strlen(suffix);
@@ -116,8 +155,8 @@ int __fxstat64(int vers, int fd, struct stat64 *buf) {
     struct opened_file *f = lookup_fd(fd);
 
     memset(buf, 0, sizeof(*buf));
-    buf->st_mode = endswith(f->path, "/") ? S_IFDIR : S_IFREG;
-    buf->st_size = 0;
+    buf->st_mode = f->embedded->mode;
+    buf->st_size = f->embedded->size;
     return 0;
 }
 

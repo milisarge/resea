@@ -20,4 +20,22 @@ typedef int pthread_mutex_t;
 typedef void pthread_mutexattr_t;
 typedef void pthread_cond_t;
 
+struct stat64 {
+    unsigned long st_dev;
+    unsigned long st_ino;
+    unsigned long st_nlink;
+    unsigned st_mode;
+    unsigned st_uid;
+    unsigned st_gid;
+    unsigned __pad0;
+    unsigned long st_rdev;
+    long st_size;
+    // TODO: Add remaining fields.
+} __packed;
+
+#define S_IFREG   0100000
+#define S_IFDIR   0040000
+
+# define AT_FDCWD -100
+
 #endif
