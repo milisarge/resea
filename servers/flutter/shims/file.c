@@ -172,6 +172,16 @@ int epoll_wait(void) {
 
 void *mmap64(void *addr, size_t length, int prot, int flags, int fd, long offset) {
     TRACE("[%d] shim: %s(fd=%d, off=%d)", task_self(), __func__, fd, offset);
+    if (fd == -1) {
+        struct message m;
+        m.type = VM_ALLOC_PAGES_MSG;
+        m.vm_alloc_pages.num_pages = ALIGN_UP(length, PAGE_SIZE) / PAGE_SIZE;
+        m.vm_alloc_pages.paddr = 0;
+        ASSERT_OK(ipc_call(INIT_TASK, &m));
+        ASSERT(m.type == VM_ALLOC_PAGES_REPLY_MSG);
+        return (void *) m.vm_alloc_pages_reply.vaddr;
+    }
+
     struct opened_file *f = lookup_fd(fd);
     ASSERT(f->embedded);
     return &f->embedded->data[offset];

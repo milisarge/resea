@@ -83,7 +83,6 @@ int pthread_setspecific(pthread_key_t key, const void *value) {
     ASSERT(key < PTHREAD_KEY_MAX);
     struct tls_data *data = &current_tls()->keys[key];
     data->value = value;
-    OOPS("OK");
     return 0;
 }
 
@@ -91,6 +90,7 @@ void *pthread_getspecific(pthread_key_t key) {
     TRACE("[%d] shim: %s", task_self(), __func__);
     ASSERT(key < PTHREAD_KEY_MAX);
     struct tls_data *data = &current_tls()->keys[key];
+    OOPS("OK2");
     return (void *) data->value;
 }
 

@@ -423,7 +423,7 @@ int pread64() {
 
 int read() {
     TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
+    return 128;
 }
 
 int readdir64() {
