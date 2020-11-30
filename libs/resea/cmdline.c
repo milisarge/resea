@@ -17,7 +17,7 @@ void cmdline_arg(char **result, const char *cmd, const char *name, bool optional
     ASSERT(cmd != NULL);
 
     LIST_FOR_EACH (c, &commands, struct cmdline_cmd, next) {
-        if ((!c && !c->name) || (c->name && !strcmp(c->name, (char *) cmd))) {
+        if ((!c && !c->name) || (c->name && !resea_strcmp(c->name, (char *) cmd))) {
             struct cmdline_arg *arg = malloc(sizeof(*arg));
             arg->cmd = c;
             arg->name = strdup(name);
@@ -37,7 +37,7 @@ void cmdline_parse(const char *cmdline, char **cmd_name) {
     if (list_len(&commands) > 1) {
         // Parse the command + arguments.
         *cmd_name = s;
-        char *sep = strchr(s, ' ');
+        char *sep = resea_strchr(s, ' ');
         if (*sep == '\0') {
             s = sep;
         } else {
@@ -62,7 +62,7 @@ void cmdline_parse(const char *cmdline, char **cmd_name) {
     // Look for the command.
     struct cmdline_cmd *cmd = NULL;
     LIST_FOR_EACH (c, &commands, struct cmdline_cmd, next) {
-        if ((!*cmd_name && !c->name) || (c->name && !strcmp(c->name, *cmd_name))) {
+        if ((!*cmd_name && !c->name) || (c->name && !resea_strcmp(c->name, *cmd_name))) {
             cmd = c;
             break;
         }
@@ -90,7 +90,7 @@ void cmdline_parse(const char *cmdline, char **cmd_name) {
         *arg->result = s;
 
         // Find the next argument.
-        char *sep = strchr(s, ' ');
+        char *sep = resea_strchr(s, ' ');
         if (*sep == '\0') {
             break;
         }

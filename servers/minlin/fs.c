@@ -177,12 +177,12 @@ struct mountpoint *look_for_mountpoint(const char **path) {
     struct mountpoint *mount = &root_mountpoint;
 
     // FIXME:
-    if (!strcmp(*path, "/dev/null")) {
+    if (!resea_strcmp(*path, "/dev/null")) {
         mount = &devfs_mountpoint;
     }
 
     // FIXME:
-    if (!strcmp(*path, "/dev/console")) {
+    if (!resea_strcmp(*path, "/dev/console")) {
         mount = &devfs_mountpoint;
     }
 

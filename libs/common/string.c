@@ -9,7 +9,7 @@ size_t strlen(const char *s) {
     return len;
 }
 
-char *strncpy(char *dst, const char *src, size_t num) {
+char *resea_strncpy(char *dst, const char *src, size_t num) {
     size_t i = 0;
     while (i < num - 1 && src[i] != '\0') {
         dst[i] = src[i];
@@ -20,7 +20,7 @@ char *strncpy(char *dst, const char *src, size_t num) {
     return dst;
 }
 
-int strcmp(const char *s1, const char *s2) {
+int resea_strcmp(const char *s1, const char *s2) {
     while (*s1 == *s2 && *s1 != '\0' && *s2 != '\0') {
         s1++;
         s2++;
@@ -29,7 +29,7 @@ int strcmp(const char *s1, const char *s2) {
     return *s1 - *s2;
 }
 
-int strncmp(const char *s1, const char *s2, size_t len) {
+int resea_strncmp(const char *s1, const char *s2, size_t len) {
     while (len > 0) {
         if (*s1 != *s2) {
             return *s1 - *s2;
@@ -48,11 +48,11 @@ int strncmp(const char *s1, const char *s2, size_t len) {
     return 0;
 }
 
-char *strstr(const char *haystack, const char *needle) {
+char *resea_strstr(const char *haystack, const char *needle) {
     char *s = (char *) haystack;
     size_t needle_len = strlen(needle);
     while (*s != '\0') {
-        if (!strncmp(s, needle, needle_len)) {
+        if (!resea_strncmp(s, needle, needle_len)) {
             return s;
         }
 
@@ -62,7 +62,7 @@ char *strstr(const char *haystack, const char *needle) {
     return NULL;
 }
 
-char *strchr(const char *s, int c) {
+char *resea_strchr(const char *s, int c) {
     while (*s != c && *s != '\0') {
         s++;
     }
@@ -70,7 +70,7 @@ char *strchr(const char *s, int c) {
     return (char *) s;
 }
 
-int atoi(const char *s) {
+int resea_atoi(const char *s) {
     int x = 0;
     while ('0' <= *s && *s <= '9')  {
         x = (x * 10) + (*s - '0');
@@ -80,7 +80,7 @@ int atoi(const char *s) {
     return x;
 }
 
-int memcmp(const void *p1, const void *p2, size_t len) {
+int resea_memcmp(const void *p1, const void *p2, size_t len) {
     uint8_t *s1 = (uint8_t *) p1;
     uint8_t *s2 = (uint8_t *) p2;
     while (*s1 == *s2 && len > 0) {
@@ -92,7 +92,7 @@ int memcmp(const void *p1, const void *p2, size_t len) {
     return (len > 0) ? *s1 - *s2 : 0;
 }
 
-void bzero(void *dst, size_t len) {
+void resea_bzero(void *dst, size_t len) {
     memset(dst, 0, len);
     MEMORY_BARRIER();
 }

@@ -51,7 +51,7 @@ static void launch_task(int argc, char **argv) {
     char *name_and_cmdline = malloc(len);
     size_t offset = 0;
     for (int i = 0; i < argc; i++) {
-        strncpy(&name_and_cmdline[offset], argv[i], len - offset);
+        resea_strncpy(&name_and_cmdline[offset], argv[i], len - offset);
         offset += strlen(argv[i]);
         name_and_cmdline[offset++] = ' ';
     }
@@ -76,7 +76,7 @@ static void run(char *cmdline) {
     }
 
     for (int i = 0; commands[i].name != NULL; i++) {
-        if (!strcmp(commands[i].name, argv[0])) {
+        if (!resea_strcmp(commands[i].name, argv[0])) {
             commands[i].run(argc, argv);
             return;
         }

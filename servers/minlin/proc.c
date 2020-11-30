@@ -97,7 +97,7 @@ static errno_t init_stack(struct proc *proc, char *argv[], __unused char *envp[]
             return -ENOMEM;
         }
 
-        strncpy(&strbuf[stroff], argv[i], len + 1);
+        resea_strncpy(&strbuf[stroff], argv[i], len + 1);
         stroff += len + 1;
     }
     *sp++ = 0;
@@ -160,13 +160,13 @@ errno_t proc_execve(struct proc *proc, const char *path, char *argv[],
 
     // Ensure it's an ELF file.
     struct elf64_ehdr *ehdr = (struct elf64_ehdr *) proc->file_header->buf;
-    if (memcmp(ehdr->e_ident, "\x7f" "ELF", 4) != 0) {
+    if (resea_memcmp(ehdr->e_ident, "\x7f" "ELF", 4) != 0) {
         return -ENOEXEC;
     }
 
     // Fill out fields.
     ASSERT(argv[0]);
-    strncpy(proc->name, argv[0], sizeof(proc->name));
+    resea_strncpy(proc->name, argv[0], sizeof(proc->name));
     proc->state = PROC_RUNNABLE;
     proc->current_brk = HEAP_ADDR;
     proc->ehdr = ehdr;
@@ -200,7 +200,7 @@ pid_t proc_fork(struct proc *parent) {
     child->parent = parent;
     if (parent) {
         child->state = PROC_FORKED;
-        strncpy(child->name, parent->name, sizeof(child->name));
+        resea_strncpy(child->name, parent->name, sizeof(child->name));
         child->exec = parent->exec;
         child->current_brk = parent->current_brk;
         child->ehdr = parent->ehdr;
@@ -213,7 +213,7 @@ pid_t proc_fork(struct proc *parent) {
     } else {
         // The init process.
         ASSERT(child->pid == 1);
-        strncpy(child->name, "init", sizeof(child->name));
+        resea_strncpy(child->name, "init", sizeof(child->name));
         child->state = PROC_RUNNABLE;
         child->exec = NULL;
         child->current_brk = 0;

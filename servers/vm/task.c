@@ -55,9 +55,9 @@ static void init_task_struct(struct task *task, struct vmspace *vmspace, const c
     task->received_ool_from = 0;
     list_init(&task->ool_sender_queue);
     list_nullify(&task->ool_sender_next);
-    strncpy(task->name, name, sizeof(task->name));
-    strncpy(task->cmdline, cmdline, sizeof(task->cmdline));
-    strncpy(task->waiting_for, "", sizeof(task->waiting_for));
+    resea_strncpy(task->name, name, sizeof(task->name));
+    resea_strncpy(task->cmdline, cmdline, sizeof(task->cmdline));
+    resea_strncpy(task->waiting_for, "", sizeof(task->waiting_for));
     list_init(&task->watchers);
     memset(&task->thread_info, 0, sizeof(task->thread_info));
 }
@@ -83,7 +83,7 @@ task_t task_spawn(struct bootfs_file *file, const char *cmdline, struct vmspace 
 
     // Ensure that it's an ELF file.
     struct elf64_ehdr *ehdr = (struct elf64_ehdr *) file_header;
-    if (memcmp(ehdr->e_ident, "\x7f" "ELF", 4) != 0) {
+    if (resea_memcmp(ehdr->e_ident, "\x7f" "ELF", 4) != 0) {
         WARN("%s: invalid ELF magic, ignoring...", file->name);
         return ERR_NOT_ACCEPTABLE;
     }
@@ -128,7 +128,7 @@ task_t task_spawn_by_cmdline(const char *name_with_cmdline) {
     // Look for the executable in bootfs named `name`.
     struct bootfs_file *file;
     for (int i = 0; (file = bootfs_open(i)) != NULL; i++) {
-        if (!strcmp(file->name, name)) {
+        if (!resea_strcmp(file->name, name)) {
             break;
         }
     }
@@ -144,7 +144,7 @@ task_t task_spawn_by_cmdline(const char *name_with_cmdline) {
 void task_kill(struct task *task) {
     LIST_FOR_EACH (w, &task->watchers, struct task_watcher, next) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         m.type = TASK_EXITED_MSG;
         m.task_exited.task = task->tid;
         async_send(w->watcher->tid, &m);
@@ -194,37 +194,37 @@ void service_register(struct task *task, const char *name) {
     // Add the server into the service list.
     struct service *service = malloc(sizeof(*service));
     service->task = task->tid;
-    strncpy(service->name, name, sizeof(service->name));
+    resea_strncpy(service->name, name, sizeof(service->name));
     list_nullify(&service->next);
     list_push_back(&services, &service->next);
 
     // Look for tasks waiting for the service...
     for (int i = 0; i < CONFIG_NUM_TASKS; i++) {
         struct task *task = &tasks[i];
-        if (!strcmp(task->waiting_for, name)) {
+        if (!resea_strcmp(task->waiting_for, name)) {
             struct message m;
-            bzero(&m, sizeof(m));
+            resea_bzero(&m, sizeof(m));
 
             m.type = DISCOVERY_LOOKUP_REPLY_MSG;
             m.discovery_lookup_reply.task = service->task;
             ipc_reply(task->tid, &m);
 
             // The task no longer wait for the service. Clear the field.
-            strncpy(task->waiting_for, "", sizeof(task->waiting_for));
+            resea_strncpy(task->waiting_for, "", sizeof(task->waiting_for));
         }
     }
 }
 
 task_t service_wait(struct task *task, const char *name) {
     LIST_FOR_EACH (s, &services, struct service, next) {
-        if (!strcmp(s->name, name)) {
+        if (!resea_strcmp(s->name, name)) {
             return s->task;
         }
     }
 
     // The service is not yet available. Block the caller task until the
     // server is registered by `ipc_serve()`.
-    strncpy(task->waiting_for, name, sizeof(task->waiting_for));
+    resea_strncpy(task->waiting_for, name, sizeof(task->waiting_for));
     return ERR_WOULD_BLOCK;
 }
 

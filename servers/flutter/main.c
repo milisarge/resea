@@ -46,22 +46,22 @@ void parse_app_so(void) {
         uint8_t *data = &__app_so[sym->st_value];
         TRACE("app.so: offset=%p, size=%p, symbol=%s", sym->st_value, sym->st_size, name);
 
-        if (!strcmp(name, "_kDartVmSnapshotInstructions")) {
+        if (!resea_strcmp(name, "_kDartVmSnapshotInstructions")) {
             kDartVmSnapshotInstructions = data;
             kDartVmSnapshotInstructionsSize = sym->st_size;
             continue;
         }
-        if (!strcmp(name, "_kDartVmSnapshotData")) {
+        if (!resea_strcmp(name, "_kDartVmSnapshotData")) {
             kDartVmSnapshotData = data;
             kDartVmSnapshotDataSize = sym->st_size;
             continue;
         }
-        if (!strcmp(name, "_kDartIsolateSnapshotInstructions")) {
+        if (!resea_strcmp(name, "_kDartIsolateSnapshotInstructions")) {
             kDartIsolateSnapshotInstructions = data;
             kDartIsolateSnapshotInstructionsSize = sym->st_size;
             continue;
         }
-        if (!strcmp(name, "_kDartIsolateSnapshotData")) {
+        if (!resea_strcmp(name, "_kDartIsolateSnapshotData")) {
             kDartIsolateSnapshotData = data;
             kDartIsolateSnapshotDataSize = sym->st_size;
             continue;

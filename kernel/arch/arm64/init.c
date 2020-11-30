@@ -55,8 +55,8 @@ void arm64_init(void) {
     // We no longer need to access the lower addresses.
     ARM64_MSR(ttbr0_el1, 0ull);
 
-    bzero(get_cpuvar(), sizeof(struct cpuvar));
-    bzero(__bss, (vaddr_t) __bss_end - (vaddr_t) __bss);
+    resea_bzero(get_cpuvar(), sizeof(struct cpuvar));
+    resea_bzero(__bss, (vaddr_t) __bss_end - (vaddr_t) __bss);
 
     arm64_peripherals_init();
     lock();

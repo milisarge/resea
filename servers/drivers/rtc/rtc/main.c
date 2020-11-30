@@ -66,7 +66,7 @@ void main(void) {
     TRACE("ready");
     while (true) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         error_t err = ipc_recv(IPC_ANY, &m);
         ASSERT_OK(err);
 

@@ -86,7 +86,7 @@ static struct file *open(const char *path) {
     }
 
     LIST_FOR_EACH(file, &files, struct file, next) {
-        if (!strcmp(file->path, path)) {
+        if (!resea_strcmp(file->path, path)) {
             if (file->linked_to) {
                 return open(file->linked_to);
             }

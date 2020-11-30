@@ -92,8 +92,8 @@ static bool filename_equals(struct fat_dirent *e, const char *name,
         ext_len--;
     }
 
-    return !strncmp((const char *) e->name, name, name_len)
-        && !strncmp((const char *) e->ext, ext, ext_len);
+    return !resea_strncmp((const char *) e->name, name, name_len)
+        && !resea_strncmp((const char *) e->ext, ext, ext_len);
 }
 
 static char *get_next_filename(char *path, char *name, char *ext) {
@@ -378,7 +378,7 @@ int fat_write(struct fat *fs, struct fat_file *file, offset_t off,
 }
 
 error_t fat_opendir(struct fat *fs, struct fat_dir *dir, const char *path) {
-    if (!strcmp(path, "/")) {
+    if (!resea_strcmp(path, "/")) {
         open_root_dir(fs, dir);
         return OK;
     }

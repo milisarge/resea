@@ -8,20 +8,20 @@ error_t kdebug_run(const char *cmdline, char *buf, size_t len) {
     if (strlen(cmdline) == 0) {
         // An empty command. Just ignore it.
         return OK;
-    } else if (strcmp(cmdline, "help") == 0) {
+    } else if (resea_strcmp(cmdline, "help") == 0) {
         INFO("Kernel debugger commands:");
         INFO("");
         INFO("  ps - List tasks.");
         INFO("  q  - Quit the emulator.");
         INFO("");
-    } else if (strcmp(cmdline, "ps") == 0) {
+    } else if (resea_strcmp(cmdline, "ps") == 0) {
         task_dump();
-    } else if (strcmp(cmdline, "q") == 0) {
+    } else if (resea_strcmp(cmdline, "q") == 0) {
 #ifdef CONFIG_SEMIHOSTING
         arch_semihosting_halt();
 #endif
         PANIC("halted by the kdebug");
-    } else if (strcmp(cmdline, "_log") == 0) {
+    } else if (resea_strcmp(cmdline, "_log") == 0) {
         if (!len) {
             return ERR_TOO_SMALL;
         }

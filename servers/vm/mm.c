@@ -163,7 +163,7 @@ paddr_t pager(struct task *task, vaddr_t vaddr, vaddr_t ip, unsigned fault) {
         paddr_t paddr = alloc_pages(task, vaddr, 1);
         ASSERT_OK(map_page(vm_task, tmp_page, paddr, MAP_W, false));
         memset((void *) tmp_page, 0, PAGE_SIZE);
-        strncpy((void *) tmp_page, task->cmdline, PAGE_SIZE);
+        resea_strncpy((void *) tmp_page, task->cmdline, PAGE_SIZE);
         return paddr;
     }
 

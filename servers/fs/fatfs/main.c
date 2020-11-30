@@ -46,7 +46,7 @@ void main(void) {
     char tmp[12];
     ASSERT_OK(fat_opendir(&fs, &dir, "/"));
     while ((e = fat_readdir(&fs, &dir)) != NULL) {
-        strncpy(tmp, (const char *) e->name, sizeof(tmp));
+        resea_strncpy(tmp, (const char *) e->name, sizeof(tmp));
         DBG("/%s", tmp);
     }
     DBG("---------------------------------------------------");
@@ -56,7 +56,7 @@ void main(void) {
     TRACE("ready");
     while (true) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         error_t err = ipc_recv(IPC_ANY, &m);
         ASSERT_OK(err);
 

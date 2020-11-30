@@ -106,7 +106,7 @@ static void register_device(task_t driver_task, macaddr_t *macaddr) {
 
 void sys_process_event(struct event *e) {
     struct message m;
-    bzero(&m, sizeof(m));
+    resea_bzero(&m, sizeof(m));
     switch (e->type) {
         case TCP_NEW_CLIENT: {
             tcp_sock_t sock = e->tcp_new_client.listen_sock;
@@ -169,7 +169,7 @@ void main(void) {
     INFO("ready");
     while (true) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         error_t err = ipc_recv(IPC_ANY, &m);
         ASSERT_OK(err);
 

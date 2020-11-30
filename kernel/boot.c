@@ -19,7 +19,7 @@ static struct bootelf_header *locate_bootelf_header(void) {
     for (size_t i = 0; i < sizeof(offsets) / sizeof(*offsets); i++) {
         struct bootelf_header *header =
             (struct bootelf_header *) &__bootelf[offsets[i]];
-        if (!memcmp(header, BOOTELF_MAGIC, sizeof(header->magic))) {
+        if (!resea_memcmp(header, BOOTELF_MAGIC, sizeof(header->magic))) {
             return header;
         }
     }
@@ -110,7 +110,7 @@ __noreturn void kmain(void) {
 
     char name[CONFIG_TASK_NAME_LEN];
     struct bootelf_header *bootelf = locate_bootelf_header();
-    strncpy(name, (const char *) bootelf->name,
+    resea_strncpy(name, (const char *) bootelf->name,
             MIN(sizeof(name), sizeof(bootelf->name)));
 
     // Create the first userland task.

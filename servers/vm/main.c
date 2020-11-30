@@ -51,7 +51,7 @@ static void spawn_servers(void) {
         // Execute the file if it is listed in the autostarts.
         while (*startups != '\0') {
             size_t len = strlen(file->name);
-            if (!strncmp(file->name, startups, len)
+            if (!resea_strncmp(file->name, startups, len)
                 && (startups[len] == '\0' || startups[len] == ' ')) {
                 task_spawn(file, "", NULL, 0);
                 num_launched++;
@@ -97,7 +97,7 @@ void main(void) {
         }
 
         struct message r;
-        bzero(&r, sizeof(r));
+        resea_bzero(&r, sizeof(r));
 
         switch (m.type) {
             case NOTIFICATIONS_MSG:

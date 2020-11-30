@@ -18,7 +18,7 @@ static void send(handle_t handle, const uint8_t *buf, size_t len) {
 }
 
 static void received(handle_t handle, uint8_t *buf, size_t len) {
-    char *sep = strstr((char *) buf, "\r\n\r\n");
+    char *sep = resea_strstr((char *) buf, "\r\n\r\n");
     if (!sep) {
         WARN("failed to find \\r\\n\\r\\n");
         return;
@@ -38,14 +38,14 @@ static error_t parse_ipaddr(const char *str, uint32_t *ip_addr) {
     char *s = s_orig;
     for (int i = 0; i < 4; i++) {
         char *part = s;
-        s = strchr(s, '.');
+        s = resea_strchr(s, '.');
         if (!s) {
             free(s_orig);
             return ERR_INVALID_ARG;
         }
 
         *s++ = '\0';
-        *ip_addr = (*ip_addr << 8) | atoi(part);
+        *ip_addr = (*ip_addr << 8) | resea_atoi(part);
     }
 
     free(s_orig);
@@ -55,7 +55,7 @@ static error_t parse_ipaddr(const char *str, uint32_t *ip_addr) {
 static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port, char **path) {
     char *s_orig = strdup(url);
     char *s = s_orig;
-    if (strstr(s, "http://") == s) {
+    if (resea_strstr(s, "http://") == s) {
         s += 7; // strlen("http://")
     } else {
         WARN_DBG("the url must start with http://");
@@ -64,20 +64,20 @@ static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port, c
 
     // `s` now points to the beginning of hostname or IP address.
     char *host = s;
-    char *sep = strchr(s, ':');
+    char *sep = resea_strchr(s, ':');
     if (*sep == '\0') {
         // The port number is not given.
         *port = 80;
-        s = strchr(s, '/');
+        s = resea_strchr(s, '/');
         if (*s) {
             *s++ = '\0';
         }
     } else {
         *sep = '\0';
         char *port_str = sep + 1; // Next to ':'.
-        s = strchr(port_str, '/');
+        s = resea_strchr(port_str, '/');
         *s++ = '\0';
-        *port = atoi(port_str);
+        *port = resea_atoi(port_str);
     }
 
     if (isdigit(*host)) {

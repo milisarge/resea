@@ -98,7 +98,7 @@ struct embedded_file *lookup_embedded_file(const char *path) {
             f->size = (size_t) f->data_end - (size_t) f->data;
         }
 
-        if (!strcmp(f->path, path)) {
+        if (!resea_strcmp(f->path, path)) {
             return f;
         }
 
@@ -140,14 +140,14 @@ int openat64(int dirfd, const char *path, int mode) {
 
 int readlink(const char *path, char *buf, size_t bufsiz) {
     TRACE("[%d] shim: %s(path=%s)", task_self(), __func__, path);
-    strncpy(buf, path, bufsiz);
+    resea_strncpy(buf, path, bufsiz);
     return strlen(buf);
 }
 
 bool endswith(const char *s, const char *suffix) {
     size_t s_len = strlen(s);
     size_t suffix_len = strlen(suffix);
-    return s_len >= suffix_len && !strcmp(&s[s_len - suffix_len], suffix);
+    return s_len >= suffix_len && !resea_strcmp(&s[s_len - suffix_len], suffix);
 }
 
 int __fxstat64(int vers, int fd, struct stat64 *buf) {

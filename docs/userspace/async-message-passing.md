@@ -34,7 +34,7 @@ void somewhere(void) {
 void main(void) {
     while (true) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         ASSERT_OK(ipc_recv(IPC_ANY, &m));
 
         switch (m.type) {
@@ -57,7 +57,7 @@ async message:
 void main(void) {
     while (true) {
         struct message m;
-        bzero(&m, sizeof(m));
+        resea_bzero(&m, sizeof(m));
         ASSERT_OK(ipc_recv(IPC_ANY, &m));
 
         switch (m.type) {

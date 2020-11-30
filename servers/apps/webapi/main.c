@@ -52,8 +52,8 @@ static void write_response(struct client *client, const char *status,
 static void process_request(struct client *client, const char *method,
                             const char *path) {
     TRACE("%s %s", method, path);
-    bool get = !strcmp(method, "GET");
-    if (get && !strcmp(path, "/")) {
+    bool get = !resea_strcmp(method, "GET");
+    if (get && !resea_strcmp(path, "/")) {
         write_response(client, "200 OK", INDEX_HTML);
     } else {
         write_response(client, "404 Not Found", "");
@@ -73,7 +73,7 @@ static void process(struct client *client, uint8_t *data, size_t len) {
     client->request_len = new_len;
 
     // Return if we have not yet received the complete HTTP request.
-    if (!strstr(client->request, "\r\n\r\n")) {
+    if (!resea_strstr(client->request, "\r\n\r\n")) {
         return;
     }
 
@@ -81,13 +81,13 @@ static void process(struct client *client, uint8_t *data, size_t len) {
     // HTTP response...
     client->request[client->request_len] = '\0';
     char *method = client->request;
-    char *method_end = strstr(method, " ");
+    char *method_end = resea_strstr(method, " ");
     if (!method_end) {
         goto malformed;
     }
 
     char *path = method_end + 1;
-    char *path_end = strstr(path, " ");
+    char *path_end = resea_strstr(path, " ");
     if (!path_end) {
         goto malformed;
     }

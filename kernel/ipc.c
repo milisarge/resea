@@ -104,7 +104,7 @@ static error_t ipc_slowpath(struct task *dst, task_t src, __user struct message 
         struct message tmp_m;
         if (src == IPC_ANY && CURRENT->notifications) {
             // Receive pending notifications as a message.
-            bzero(&tmp_m, sizeof(tmp_m));
+            resea_bzero(&tmp_m, sizeof(tmp_m));
             tmp_m.type = NOTIFICATIONS_MSG;
             tmp_m.src = KERNEL_TASK;
             tmp_m.notifications.data = CURRENT->notifications;

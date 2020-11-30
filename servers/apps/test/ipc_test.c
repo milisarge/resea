@@ -25,7 +25,7 @@ void ipc_test(void) {
     TEST_ASSERT(err == OK);
     TEST_ASSERT(m.type == BENCHMARK_NOP_WITH_OOL_REPLY_MSG);
     TEST_ASSERT(m.benchmark_nop_with_ool_reply.data_len == 7);
-    TEST_ASSERT(!memcmp(m.benchmark_nop_with_ool_reply.data, "reply!\0", 7));
+    TEST_ASSERT(!resea_memcmp(m.benchmark_nop_with_ool_reply.data, "reply!\0", 7));
 
     // A ool IPC call.
     static char page[PAGE_SIZE * 2] = {'a', 'b', 'c'};
