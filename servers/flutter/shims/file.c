@@ -44,13 +44,80 @@ long write(int fd, const void *buf, size_t len) {
     return len;
 }
 
-int openat64(int fd, const char *path, int mode) {
-    TRACE("[%d] shim: %s(\"%s\")", task_self(), __func__, path);
-    return fd;
+#define FD_BASE 10
+#define FD_MAX 128
+struct opened_file {
+    bool in_use;
+    int fd;
+    char *path;
+};
+
+struct opened_file opened_files[FD_MAX];
+
+struct opened_file *alloc_fd(const char *path) {
+    for (int i = 0; i < FD_MAX; i++) {
+        if (!opened_files[i].in_use) {
+            opened_files[i].in_use = true;
+            opened_files[i].fd = i + FD_BASE;
+            opened_files[i].path = strdup(path);
+            return &opened_files[i];
+        }
+    }
+
+    PANIC("too many opened files");
+}
+
+struct opened_file *lookup_fd(int fd) {
+    ASSERT(fd >= FD_BASE);
+    ASSERT(fd < FD_BASE + FD_MAX);
+    struct opened_file *f = &opened_files[fd - FD_BASE];
+    ASSERT(f->fd == fd);
+    return f;
+}
+
+# define AT_FDCWD -100
+int openat64(int dirfd, const char *path, int mode) {
+    TRACE("[%d] shim: %s(dirfd=%d, path=\"%s\")", task_self(), __func__, dirfd, path);
+    ASSERT(dirfd == AT_FDCWD);
+    struct opened_file *f = alloc_fd(path);
+    return f->fd;
+}
+
+int readlink(const char *path, char *buf, size_t bufsiz) {
+    TRACE("[%d] shim: %s(path=%s)", task_self(), __func__, path);
+    strncpy(buf, path, bufsiz);
+    return strlen(buf);
+}
+
+struct stat64 {
+    unsigned long st_dev;
+    unsigned long st_ino;
+    unsigned long st_nlink;
+    unsigned st_mode;
+    unsigned st_uid;
+    unsigned st_gid;
+    unsigned __pad0;
+    unsigned long st_rdev;
+    long st_size;
+    // TODO: Add remaining fields.
+} __packed;
+
+#define S_IFREG   0100000
+#define S_IFDIR   0040000
+
+bool endswith(const char *s, const char *suffix) {
+    size_t s_len = strlen(s);
+    size_t suffix_len = strlen(suffix);
+    return s_len >= suffix_len && !strcmp(&s[s_len - suffix_len], suffix);
 }
 
 int __fxstat64(int vers, int fd, struct stat64 *buf) {
-    TRACE("[%d] shim: %s(fd=%d)", task_self(), __func__, fd);
+    OOPS("[%d] shim: %s(fd=%d)", task_self(), __func__, fd);
+    struct opened_file *f = lookup_fd(fd);
+
+    memset(buf, 0, sizeof(*buf));
+    buf->st_mode = endswith(f->path, "/") ? S_IFDIR : S_IFREG;
+    buf->st_size = 0;
     return 0;
 }
 

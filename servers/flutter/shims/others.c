@@ -191,11 +191,6 @@ int ftruncate64() {
     return 0;
 }
 
-int __fxstat64() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
 int __fxstatat64() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
@@ -437,11 +432,6 @@ int read() {
 }
 
 int readdir64() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int readlink() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
 }
