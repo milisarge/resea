@@ -59,6 +59,35 @@ struct elf32_phdr {
     uint32_t p_align;
 } __packed;
 
+
+#define ELF64_ST_TYPE(info) ((info) & 0xf)
+#define STT_OBJECT  0x01
+#define STT_FUNC    0x02
+
+#define SHT_DYNSYM  0x0b
+
+struct elf64_shdr {
+    uint32_t sh_name;
+    uint32_t sh_type;
+    uint64_t sh_flags;
+    uint64_t sh_addr;
+    uint64_t sh_offset;
+    uint64_t sh_size;
+    uint32_t sh_link;
+    uint32_t sh_info;
+    uint64_t sh_addralign;
+    uint64_t sh_entsize;
+} __packed;
+
+struct elf64_sym {
+    uint32_t st_name;
+    uint8_t  st_info;
+    uint8_t  st_other;
+    uint16_t st_shndx;
+    uint64_t st_value;
+    uint64_t st_size;
+} __packed;
+
 #ifdef __LP64__
 typedef struct elf64_ehdr elf_ehdr_t;
 typedef struct elf64_phdr elf_phdr_t;

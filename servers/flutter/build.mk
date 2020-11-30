@@ -1,6 +1,7 @@
 name := flutter
 description := A GUI server powered by Flutter
 objs-y := main.o flutter_engine.o
+libs-y := elf
 subdirs-y := shims
 
 SYSROOT_DIR := ~/src/flutter/mysdk/sysroot
