@@ -182,7 +182,7 @@ static void *do_realloc(void *ptr, size_t size) {
     }
 
     struct malloc_chunk *chunk = get_chunk_from_ptr(ptr);
-    if (chunk->capacity <= size) {
+    if (size <= chunk->capacity) {
         // There's enough room. Keep using the current chunk.
         return ptr;
     }
