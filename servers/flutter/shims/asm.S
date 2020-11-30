@@ -49,3 +49,14 @@ pthread_thread_entry:
 __icu_data:
     .incbin ICU_DATA_FILE
 __icu_data_end:
+
+#ifdef CONFIG_ARCH_ARM64
+.balign 4096
+#else
+.align 4096
+#endif
+
+.global __app_so, __app_so_end
+__app_so:
+    .incbin APP_SO
+__app_so_end:

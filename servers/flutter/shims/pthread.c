@@ -111,7 +111,7 @@ int pthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_
 }
 
 int pthread_mutex_lock(pthread_mutex_t *mutex) {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+    // TRACE("[%d] shim: %s", task_self(), __func__);
     while (!__sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_UNLOCKED, PTHREAD_MUTEX_LOCKED)) {
         __asm__ __volatile__("pause");
     }
@@ -128,7 +128,7 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex) {
 }
 
 int pthread_mutex_unlock(pthread_mutex_t *mutex) {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+    // TRACE("[%d] shim: %s", task_self(), __func__);
     __sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_LOCKED, PTHREAD_MUTEX_UNLOCKED);
     return 0;
 }

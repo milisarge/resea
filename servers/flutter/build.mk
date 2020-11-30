@@ -15,4 +15,5 @@ external-objs-y := \
 cflags-y := \
 	-I/home/seiya/flutter/src/build/linux/debian_sid_arm64-sysroot/usr/lib/gcc/aarch64-linux-gnu/7/include \
 	-I/home/seiya/flutter/src/out/$(flutter_build) \
-	-DICU_DATA_FILE='"/home/seiya/flutter/src/out/$(flutter_build)/icudtl.dat"'
+	-DICU_DATA_FILE='"/home/seiya/flutter/src/out/$(flutter_build)/icudtl.dat"' \
+	-DAPP_SO='"/home/seiya/hello-from-flutter/myapp/build/app.so"' \

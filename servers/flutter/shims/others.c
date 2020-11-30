@@ -87,12 +87,12 @@ int dlerror() {
 }
 
 int dlopen() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+    DBG("[%d] shim: %s", task_self(), __func__);
     return 0;
 }
 
-int dlsym() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
+void *dlsym(void *handle, const char *symbol) {
+    OOPS("[%d] shim: %s(symbol=\"%s\")", task_self(), __func__, symbol);
     return 0;
 }
 

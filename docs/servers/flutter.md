@@ -58,6 +58,33 @@ mkdir -p build && cd build
 ../newlib/configure --disable-multilib --disable-shared --target=x86_64-elf --disable-newlib-supplied-syscalls CFLAGS="-D_FORTIFY_SOURCE=0 -fno-stack-protector"
 ```
 
+## Compling Your App
+```
+flutter new myapp
+cd myapp
+```
+
+```
+$ flutter channel master
+$ flutter channel dev
+Flutter 1.24.0-8.0.pre.374 • channel master • https://github.com/flutter/flutter.git
+Framework • revision 183f0e797a (4 days ago) • 2020-11-26 19:12:28 +0100
+Engine • revision 20caf54969
+Tools • Dart 2.12.0 (build 2.12.0-76.0.dev)
+```
+
+```
+flutter bundle build --release --no-tree-shake-icons
+```
+
+```
+~/flutter/src/out/linux_release_x64/dart ~/flutter/src/out/linux_release_x64/gen/frontend_server.dart.snapshot --sdk-root ~/flutter/src/out/linux_release_x64/flutter_patched_sdk --target=flutter --aot --tfa -Ddart.vm.product=true --packages .packages --verbose --output-dill build/kernel_snapshot.dill package:myapp/main.dart
+```
+
+```
+~/flutter/src/out/linux_release_x64/gen_snapshot --causal_async_stacks --deterministic --snapshot_kind=app-aot-elf --elf=build/app.so --strip build/kernel_snapshot.dill
+```
+
 ## Debugging Notes
 Since Flutter and its external dependencies (especially libcxx) have so many symbols, we cannot embed all of them into the symbol table.
 
