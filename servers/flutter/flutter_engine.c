@@ -118,10 +118,9 @@ static void post_task_callback(FlutterTask task, uint64_t target_time_ns,
     NYI();
 }
 
-const int argc = 2;
+const int argc = 1;
 const char *const argv[argc + 1] = {
-    "",
-    "",
+    "flutter-argv0",
     NULL,
 };
 
