@@ -116,11 +116,6 @@ int epoll_ctl() {
     return 0;
 }
 
-int __errno_location() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
 int execvp() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
@@ -143,11 +138,6 @@ int fcntl() {
 
 int fdopendir() {
     TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int fopen64(const char *path, const char *mode) {
-    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
     return 0;
 }
 
@@ -383,16 +373,13 @@ int nanosleep() {
 
 int open() {
     TRACE("[%d] shim: %s", task_self(), __func__);
-    return 0;
-}
-
-int open64(const char *path, int flags) {
-    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
+    NYI();
     return 0;
 }
 
 int opendir() {
     TRACE("[%d] shim: %s", task_self(), __func__);
+    NYI();
     return 0;
 }
 
@@ -419,11 +406,6 @@ int posix_memalign() {
 int pread64() {
     TRACE("[%d] shim: %s", task_self(), __func__);
     return 0;
-}
-
-int read() {
-    TRACE("[%d] shim: %s", task_self(), __func__);
-    return 128;
 }
 
 int readdir64() {

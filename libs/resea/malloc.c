@@ -176,7 +176,7 @@ void do_free(void *ptr) {
     bins[bin_idx] = chunk;
 }
 
-static void *do_realloc(void *ptr, size_t size) {
+void *do_realloc(void *ptr, size_t size) {
     if (!ptr) {
         return do_malloc(size);
     }

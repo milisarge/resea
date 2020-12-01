@@ -143,7 +143,7 @@ error_t map_page(struct task *task, vaddr_t vaddr, paddr_t paddr, unsigned flags
 
 paddr_t pager(struct task *task, vaddr_t vaddr, vaddr_t ip, unsigned fault) {
     if (vaddr < PAGE_SIZE) {
-        WARN("%s (%d): null pointer dereference at IP=%p", task->name, task->tid, vaddr, ip);
+        WARN("%s (%d): null pointer dereference at vaddr=%p, ip=%p", task->name, task->tid, vaddr, ip);
         return 0;
     }
 

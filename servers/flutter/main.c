@@ -7,17 +7,18 @@ void init_file_shims(void);
 void init_pthread_shims(void);
 
 #include <elf/elf.h>
-extern uint8_t __app_so[];
+// extern uint8_t __app_so[];
 
-uint8_t *kDartVmSnapshotInstructions = NULL;
-size_t kDartVmSnapshotInstructionsSize = 0;
-uint8_t *kDartVmSnapshotData = NULL;
-size_t kDartVmSnapshotDataSize = 0;
-uint8_t *kDartIsolateSnapshotInstructions = NULL;
-size_t kDartIsolateSnapshotInstructionsSize = 0;
-uint8_t *kDartIsolateSnapshotData = NULL;
-size_t kDartIsolateSnapshotDataSize = 0;
+// uint8_t *kDartVmSnapshotInstructions = NULL;
+// size_t kDartVmSnapshotInstructionsSize = 0;
+// uint8_t *kDartVmSnapshotData = NULL;
+// size_t kDartVmSnapshotDataSize = 0;
+// uint8_t *kDartIsolateSnapshotInstructions = NULL;
+// size_t kDartIsolateSnapshotInstructionsSize = 0;
+// uint8_t *kDartIsolateSnapshotData = NULL;
+// size_t kDartIsolateSnapshotDataSize = 0;
 
+/*
 void parse_app_so(void) {
     struct elf64_ehdr *ehdr = (struct elf64_ehdr *) __app_so;
     struct elf64_shdr *shdrs = (struct elf64_shdr *) &__app_so[ehdr->e_shoff];
@@ -68,6 +69,7 @@ void parse_app_so(void) {
         }
     }
 }
+*/
 
 void main(void) {
     TRACE("starting...");
@@ -75,7 +77,7 @@ void main(void) {
     INFO("ready");
     init_file_shims();
     init_pthread_shims();
-    parse_app_so();
+//    parse_app_so();
     init();
     INFO("successfully initialized flutter!");
 }

@@ -44,16 +44,10 @@ long write(int fd, const void *buf, size_t len) {
     return len;
 }
 
-struct embedded_file {
-    const char *path;
-    unsigned mode;
-    uint8_t *data;
-    uint8_t *data_end;
-    size_t size;
-};
-
 #define FD_BASE 10
 #define FD_MAX 128
+
+struct embedded_file;
 struct opened_file {
     bool in_use;
     int fd;
@@ -61,6 +55,50 @@ struct opened_file {
     struct embedded_file *embedded;
 };
 
+struct embedded_file {
+    const char *path;
+    enum {
+        FILETYPE_RAW_BINARY,
+        FILETYPE_OPS,
+    } type;
+    union {
+        struct {
+            int (*read)(struct opened_file *f, uint8_t *buf, size_t len);
+            int (*write)(struct opened_file *f, const uint8_t *buf, size_t len);
+            int (*stat)(struct opened_file *f, struct stat64 *buf);
+        } ops;
+        struct {
+            unsigned mode;
+            uint8_t *data;
+            uint8_t *data_end;
+            size_t size;
+        } raw;
+    };
+};
+
+
+int ignore_read(struct opened_file *f, const uint8_t *buf, size_t len) {
+    WARN_DBG("ignoring read: %s", f->path);
+    return len;
+}
+
+int ignore_write(struct opened_file *f, const uint8_t *buf, size_t len) {
+    WARN_DBG("ignoring write: %s", f->path);
+    return len;
+}
+
+int ignore_stat(struct opened_file *f, struct stat64 *buf) {
+    WARN_DBG("ignoring stat: %s", f->path);
+    return 0;
+}
+
+__attribute__((no_sanitize("undefined"))) int urandom_read(struct opened_file *f, uint8_t *buf, size_t len) {
+    static int seed = 123;
+    while (len-- > 0) {
+        *buf++ = seed = seed * 124567;
+    }
+    return len;
+}
 
 struct opened_file opened_files[FD_MAX];
 
@@ -69,24 +107,42 @@ extern char __icu_data_end[];
 struct embedded_file embedded_files[] = {
     {
         .path = "/assets/",
-        .mode = S_IFDIR,
-        .data = NULL,
-        .data_end = NULL,
-        .size = 0
+        .type = FILETYPE_RAW_BINARY,
+        .raw = {
+            .mode = S_IFDIR,
+            .data = NULL,
+            .data_end = NULL,
+            .size = 0,
+        },
     },
     {
         .path = "/icu_data/icudtl.dat",
-        .mode = S_IFREG,
-        .data = (uint8_t *) __icu_data,
-        .data_end = (uint8_t *) __icu_data_end,
-        .size = 0,
+        .type = FILETYPE_RAW_BINARY,
+        .raw = {
+            .mode = S_IFREG,
+            .data = (uint8_t *) __icu_data,
+            .data_end = (uint8_t *) __icu_data_end,
+            .size = 0,
+        },
+    },
+    {
+        .path = "/dev/urandom",
+        .type = FILETYPE_OPS,
+        .ops = {
+            .read = urandom_read,
+            .write = ignore_write,
+            .stat = ignore_stat,
+        },
     },
     {
         .path = NULL,
-        .mode = S_IFREG,
-        .data = NULL,
-        .data_end = NULL,
-        .size = 0
+        .type = FILETYPE_RAW_BINARY,
+        .raw = {
+            .mode = S_IFREG,
+            .data = NULL,
+            .data_end = NULL,
+            .size = 0,
+        },
     },
 };
 
@@ -94,8 +150,8 @@ struct embedded_file *lookup_embedded_file(const char *path) {
     int i = 0;
     while (embedded_files[i].path) {
         struct embedded_file *f = &embedded_files[i];
-        if (f->data_end) {
-            f->size = (size_t) f->data_end - (size_t) f->data;
+        if (f->type == FILETYPE_RAW_BINARY && f->raw.data_end) {
+            f->raw.size = (size_t) f->raw.data_end - (size_t) f->raw.data;
         }
 
         if (!resea_strcmp(f->path, path)) {
@@ -105,7 +161,7 @@ struct embedded_file *lookup_embedded_file(const char *path) {
         i++;
     }
 
-    WARN_DBG("unknown file: %s", path);
+    PANIC("unknown file: %s", path);
     return NULL;
 }
 
@@ -138,6 +194,21 @@ int openat64(int dirfd, const char *path, int mode) {
     return f->fd;
 }
 
+int open64(const char *path, int flags) {
+    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
+    struct opened_file *f = alloc_fd(path);
+    return f->fd;
+}
+
+void *fopen64(const char *path, const char *mode) {
+    OOPS("[%d] shim: %s(path='%s')", task_self(), __func__, path);
+    if (!resea_strcmp(path, "/proc/sys/vm/max_map_count")) {
+        return NULL;
+    } else {
+        NYI();
+    }
+}
+
 int readlink(const char *path, char *buf, size_t bufsiz) {
     TRACE("[%d] shim: %s(path=%s)", task_self(), __func__, path);
     resea_strncpy(buf, path, bufsiz);
@@ -155,8 +226,15 @@ int __fxstat64(int vers, int fd, struct stat64 *buf) {
     struct opened_file *f = lookup_fd(fd);
 
     memset(buf, 0, sizeof(*buf));
-    buf->st_mode = f->embedded->mode;
-    buf->st_size = f->embedded->size;
+    switch (f->embedded->type) {
+        case FILETYPE_RAW_BINARY:
+            buf->st_size = f->embedded->raw.size;
+            buf->st_mode = f->embedded->raw.mode;
+            break;
+        case FILETYPE_OPS:
+            f->embedded->ops.stat(f, buf);
+            break;
+    }
     return 0;
 }
 
@@ -169,6 +247,17 @@ int epoll_wait(void) {
     return 0;
 }
 
+int read(int fd, uint8_t *buf, size_t len) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    TRACE("fd=%d",fd );
+    struct opened_file *f = lookup_fd(fd);
+    switch (f->embedded->type) {
+        case FILETYPE_OPS:
+            return f->embedded->ops.read(f, buf, len);
+        case FILETYPE_RAW_BINARY:
+            NYI();
+    }
+}
 
 void *mmap64(void *addr, size_t length, int prot, int flags, int fd, long offset) {
     TRACE("[%d] shim: %s(fd=%d, off=%d)", task_self(), __func__, fd, offset);
@@ -183,8 +272,12 @@ void *mmap64(void *addr, size_t length, int prot, int flags, int fd, long offset
     }
 
     struct opened_file *f = lookup_fd(fd);
-    ASSERT(f->embedded);
-    return &f->embedded->data[offset];
+    switch (f->embedded->type) {
+        case FILETYPE_OPS:
+            NYI();
+        case FILETYPE_RAW_BINARY:
+            return &f->embedded->raw.data[offset];
+    }
 }
 
 void init_file_shims(void) {

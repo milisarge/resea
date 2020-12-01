@@ -102,7 +102,11 @@ void x64_handle_interrupt(uint8_t vec, struct iframe *frame) {
             }
 
             // TRACE("");
-            // dump_frame(frame);
+            if (addr < 0x1000) {
+                WARN_DBG("possibly null pointer dereference: %s (%d)", CURRENT->name, CURRENT->tid);
+                dump_frame(frame);
+                halt();
+            }
             handle_page_fault(addr, ip, fault);
             break;
         }

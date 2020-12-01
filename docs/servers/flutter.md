@@ -48,7 +48,7 @@ index 5f299d7..470617f 100644
      }
 ```
 
-```
+```diff
 diff --git a/runtime/vm/os_thread.h b/runtime/vm/os_thread.h
 index 675836c13fd..5c26bdd627a 100644
 --- a/runtime/vm/os_thread.h
@@ -60,6 +60,47 @@ index 675836c13fd..5c26bdd627a 100644
 +#undef HAS_C11_THREAD_LOCAL
 ```
 
+```diff
+diff --git a/src/sksl/SkSLPool.cpp b/src/sksl/SkSLPool.cpp
+index 6c250b173a..6a6da1ed51 100644
+--- a/src/sksl/SkSLPool.cpp
++++ b/src/sksl/SkSLPool.cpp
+@@ -11,9 +11,7 @@
+
+ namespace SkSL {
+
+-#if defined(SK_BUILD_FOR_IOS) && \
+-        (!defined(__IPHONE_9_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
+-
++#if 1
+ #include <pthread.h>
+```
+
+```diff
+diff --git a/third_party/tonic/dart_microtask_queue.cc b/third_party/tonic/dart_microtask_queue.cc
+index 766151338..7859052ca 100644
+--- a/third_party/tonic/dart_microtask_queue.cc
++++ b/third_party/tonic/dart_microtask_queue.cc
+@@ -8,14 +8,14 @@
+ #include "tonic/dart_state.h"
+ #include "tonic/logging/dart_invoke.h"
+
+-#ifdef OS_IOS
++#if 1
+ #include <pthread.h>
+ #endif  // OS_IOS
+
+ namespace tonic {
+ namespace {
+
+-#ifdef OS_IOS
++#if 1
+ // iOS doesn't support the thread_local keyword.
+
+ pthread_key_t g_queue_key;
+ ```
+
+## flutter
 ```
 ./flutter/tools/gn --clang --lto --embedder-for-target --target-os linux --linux-cpu x64 --runtime-mode release --no-stripped --no-goma
 ```
@@ -67,7 +108,8 @@ index 675836c13fd..5c26bdd627a 100644
 ## newlib-4.0.0
 ```
 mkdir -p build && cd build
-../newlib/configure --disable-multilib --disable-shared --target=x86_64-elf --disable-newlib-supplied-syscalls CFLAGS="-D_FORTIFY_SOURCE=0 -fno-stack-protector"
+../newlib/configure --disable-multilib --disable-shared --target=x86_64-elf --disable-newlib-supplied-syscalls
+make -j24 CFLAGS+="-D_FORTIFY_SOURCE=0 -fno-stack-protector -DMALLOC_LOCK='newlib_malloc_lock()' -DMALLOC_UNLOCK='newlib_malloc_unlock()'"
 ```
 
 ## Compling Your App
@@ -94,7 +136,7 @@ flutter bundle build --release --no-tree-shake-icons
 ```
 
 ```
-~/flutter/src/out/linux_release_x64/gen_snapshot --causal_async_stacks --deterministic --snapshot_kind=app-aot-elf --elf=build/app.so --strip build/kernel_snapshot.dill
+~/flutter/src/out/linux_release_x64/gen_snapshot_product --causal_async_stacks --deterministic --snapshot_kind=app-aot-assembly --assembly=build/app.S --strip build/kernel_snapshot.dill
 ```
 
 ## Debugging Notes

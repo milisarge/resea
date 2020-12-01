@@ -158,6 +158,7 @@ int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict m
 static uint8_t *brk_crnt = NULL, *brk_end = NULL;
 
 void *do_malloc(size_t size);
+void *do_realloc(void *ptr, size_t size);
 void do_free(void *ptr);
 pthread_mutex_t malloc_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -168,9 +169,33 @@ void *malloc(size_t size) {
     return ptr;
 }
 
+void *realloc(void *ptr, size_t size) {
+    pthread_mutex_lock(&malloc_lock);
+    ptr = do_realloc(ptr, size);
+    pthread_mutex_unlock(&malloc_lock);
+    return ptr;
+}
+
+void *calloc(size_t n, size_t size) {
+    pthread_mutex_lock(&malloc_lock);
+    void *ptr = do_malloc(size);
+    memset(ptr, 0, size * n);
+    pthread_mutex_unlock(&malloc_lock);
+    return ptr;
+}
+
 void free(void *ptr) {
     pthread_mutex_lock(&malloc_lock);
     do_free(ptr);
+    pthread_mutex_unlock(&malloc_lock);
+}
+
+void newlib_malloc_lock(void) {
+    PANIC("malloc lock!");
+    pthread_mutex_lock(&malloc_lock);
+}
+
+void newlib_malloc_unlock(void) {
     pthread_mutex_unlock(&malloc_lock);
 }
 
@@ -207,6 +232,12 @@ int pthread_attr_getstack(const pthread_attr_t *attr,
         *stacksize = (size_t) __stack_end - (size_t) __stack;
     }
     return 0;
+}
+
+static int errnos[CONFIG_NUM_TASKS];
+int *__errno_location(void) {
+    TRACE("[%d] shim: %s", task_self(), __func__);
+    return &errnos[task_self()];
 }
 
 // --------------------------------------------------------------------

@@ -21,6 +21,11 @@ SECTIONS {
 
 
         . = ALIGN(16);
+        *(.got);
+        *(.got*);
+        *(.eh_frame*);
+
+        . = ALIGN(16);
         __preinit_array = .;
         *(.preinit_array);
         __preinit_array_end = .;
@@ -47,7 +52,7 @@ SECTIONS {
 
         . = ALIGN(16);
         __stack = .;
-        . += 0x10000;
+        . += 0x20000;
         __stack_end = .;
     } :data
 
